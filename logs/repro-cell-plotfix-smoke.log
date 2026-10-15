@@ -1,0 +1,53 @@
+$WORKSPACE/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+$WORKSPACE/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet50_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet50_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Frozen layers is True
+Model loaded to device
+Dataset configured
+Dataloaders configured
+Num training images: 13480
+Training on datasets ['hmc', 'uot', 'nuh'] for 1 epochs, with lr of 0.0001, batch size 600, init from coco is True
+train
+Epoch: 0 | Phase: train | Iteration: 0 | Classification loss: 2.39903 | Running loss: 2.39903
+Epoch: 0 | Phase: train | Iteration: 1 | Classification loss: 2.39398 | Running loss: 2.39651
+Epoch: 0 | Phase: train | Iteration: 2 | Classification loss: 2.39815 | Running loss: 2.39705
+Epoch: 0 | Phase: train | Iteration: 3 | Classification loss: 2.39342 | Running loss: 2.39615
+Epoch: 0 | Phase: train | Iteration: 4 | Classification loss: 2.38501 | Running loss: 2.39392
+Epoch: 0 | Phase: train | Iteration: 5 | Classification loss: 2.38534 | Running loss: 2.39249
+Epoch: 0 | Phase: train | Iteration: 6 | Classification loss: 2.38602 | Running loss: 2.39156
+Epoch: 0 | Phase: train | Iteration: 7 | Classification loss: 2.37503 | Running loss: 2.38950
+Epoch: 0 | Phase: train | Iteration: 8 | Classification loss: 2.37301 | Running loss: 2.38767
+Epoch: 0 | Phase: train | Iteration: 9 | Classification loss: 2.36450 | Running loss: 2.38535
+Epoch: 0 | Phase: train | Iteration: 10 | Classification loss: 2.36596 | Running loss: 2.38359
+Epoch: 0 | Phase: train | Iteration: 11 | Classification loss: 2.35923 | Running loss: 2.38156
+Epoch: 0 | Phase: train | Iteration: 12 | Classification loss: 2.35499 | Running loss: 2.37951
+Epoch: 0 | Phase: train | Iteration: 13 | Classification loss: 2.35074 | Running loss: 2.37746
+Epoch: 0 | Phase: train | Iteration: 14 | Classification loss: 2.34384 | Running loss: 2.37522
+Epoch: 0 | Phase: train | Iteration: 15 | Classification loss: 2.33157 | Running loss: 2.37249
+Epoch: 0 | Phase: train | Iteration: 16 | Classification loss: 2.33602 | Running loss: 2.37034
+Epoch: 0 | Phase: train | Iteration: 17 | Classification loss: 2.33023 | Running loss: 2.36812
+Epoch: 0 | Phase: train | Iteration: 18 | Classification loss: 2.30965 | Running loss: 2.36504
+Epoch: 0 | Phase: train | Iteration: 19 | Classification loss: 2.31747 | Running loss: 2.36266
+Epoch: 0 | Phase: train | Iteration: 20 | Classification loss: 2.30233 | Running loss: 2.35979
+Epoch: 0 | Phase: train | Iteration: 21 | Classification loss: 2.30071 | Running loss: 2.35710
+Epoch: 0 | Phase: train | Iteration: 22 | Classification loss: 2.28907 | Running loss: 2.35414
+train loss: 2.3541
+train accuracy: 0.1766
+val_all
+val_all loss: 2.3097
+val_all accuracy: 0.209
+hmc
+hmc loss: 2.2922
+hmc accuracy: 0.1866
+uot
+uot loss: 2.2787
+uot accuracy: 0.2513
+nuh
+nuh loss: 2.3834
+nuh accuracy: 0.0552
+Evaluating datasets
+Best model saved
+real 1694.55
+user 10021.41
+sys 1451.55

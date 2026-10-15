@@ -1,0 +1,53 @@
+Frozen layers is True
+Model loaded to device
+Dataset configured
+Dataloaders configured
+Num training images: 178
+Training on datasets ['hmc', 'uot', 'empty'] for 1 epochs, with lr of 0.0001, batch size 16, and init from coco is True
+Epoch: 0 | Phase: train | Iter: 0 | Class loss: 0.74193 | Regression loss: 0.70007 | Running loss: 1.44200
+Epoch: 0 | Phase: train | Iter: 1 | Class loss: 0.83665 | Regression loss: 0.68886 | Running loss: 1.48376
+Epoch: 0 | Phase: train | Iter: 2 | Class loss: 0.90515 | Regression loss: 0.74588 | Running loss: 1.53952
+Epoch: 0 | Phase: train | Iter: 3 | Class loss: 0.88174 | Regression loss: 0.62248 | Running loss: 1.53069
+Epoch: 0 | Phase: train | Iter: 4 | Class loss: 0.82586 | Regression loss: 0.54755 | Running loss: 1.49923
+Epoch: 0 | Phase: train | Iter: 5 | Class loss: 0.86682 | Regression loss: 0.68800 | Running loss: 1.50850
+Epoch: 0 | Phase: train | Iter: 6 | Class loss: 1.23061 | Regression loss: 0.48729 | Running loss: 1.53841
+Epoch: 0 | Phase: train | Iter: 7 | Class loss: 0.92027 | Regression loss: 0.46044 | Running loss: 1.51870
+Epoch: 0 | Phase: train | Iter: 8 | Class loss: 0.78523 | Regression loss: 0.63659 | Running loss: 1.50794
+Epoch: 0 | Phase: train | Iter: 9 | Class loss: 0.74220 | Regression loss: 0.53061 | Running loss: 1.48442
+Epoch: 0 | Phase: train | Iter: 10 | Class loss: 0.62990 | Regression loss: 0.42492 | Running loss: 1.44537
+Epoch: 0 | Phase: train | Iter: 11 | Class loss: 0.61080 | Regression loss: 0.48748 | Running loss: 1.41644
+train loss: 1.4164
+val_all loss: 1.497
+hmc loss: 1.4839
+uot loss: 1.422
+empty loss: 3.1114
+Evaluating datasets
+
+  0%|          | 0/3 [00:00<?, ?it/s]
+ 33%|███▎      | 1/3 [00:28<00:56, 28.19s/it]
+ 67%|██████▋   | 2/3 [00:56<00:28, 28.06s/it]
+100%|██████████| 3/3 [00:59<00:00, 16.71s/it]
+100%|██████████| 3/3 [00:59<00:00, 19.79s/it]
+val_all Precision: 0
+val_all Recall: 0.0
+val_all F1: 0
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [00:03<00:00,  3.85s/it]
+100%|██████████| 1/1 [00:03<00:00,  3.85s/it]
+hmc Precision: 0
+hmc Recall: 0.0
+hmc F1: 0
+
+  0%|          | 0/2 [00:00<?, ?it/s]
+ 50%|█████     | 1/2 [00:28<00:28, 28.15s/it]
+100%|██████████| 2/2 [00:29<00:00, 12.66s/it]
+100%|██████████| 2/2 [00:29<00:00, 14.98s/it]
+uot Precision: 0
+uot Recall: 0.0
+uot F1: 0
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [00:06<00:00,  6.30s/it]
+100%|██████████| 1/1 [00:06<00:00,  6.30s/it]
+Number of predictions in empty images: 0

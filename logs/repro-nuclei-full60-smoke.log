@@ -1,0 +1,8 @@
+Frozen layers is False
+Model loaded to device
+Dataset configured
+Dataloaders configured
+Num training images: 178
+Training on datasets ['hmc', 'uot', 'empty'] for 1 epochs, with lr of 0.001, batch size 16, and init from coco is False
+Epoch: 0 | Phase: train | Iter: 0 | Class loss: 0.57802 | Regression loss: 0.52065 | Running loss: 1.09867
+Epoch: 0 | Phase: train | Iter: 1 | Class loss: inf | Regression loss: 236.03928 | Running loss: inf

@@ -1,0 +1,12 @@
+Captured 2026-10-15 (Asia/Kolkata)
+Operating system: macOS 26.6.2, Darwin 25.6.0, arm64
+Hardware: MacBook Pro Mac15,3, Apple M3, 8 CPU cores (4 performance + 4 efficiency), 16 GB unified memory
+CUDA: unavailable
+Installed system Python: 3.10.0 (do not alter)
+Installed system PyTorch: 2.10.0; torch.cuda.is_available()=False; torch.backends.mps.is_available()=False
+Disk available at inspection: approximately 25 GiB
+Paper hardware: one NVIDIA A100 GPU
+
+Isolated environment installed: Python 3.10.0, PyTorch 2.0.1, torchvision 0.15.2, torch-geometric 2.3.1. Runtime smoke imports confirmed CUDA=False and MPS=False. Core HAPPY package install completed. The full isolated package inventory is in pip_freeze.txt. PyG optional CPU extensions failed their install attempts. One-epoch smoke training completed for nuclei and cell stages; no full paper schedule or test evaluation has run. Graph smoke is blocked by missing PyG extensions.
+
+Local cell plotting-fix task update (2026-10-15): isolated PyTorch reports MPS built=True but `torch.backends.mps.is_available()=False`; CUDA=False, so training used CPU. The fresh cell initialization smoke epoch took 1,694.55 seconds. Available disk after that run was 8.6 GiB. No full training schedule or held-out test evaluation was started.

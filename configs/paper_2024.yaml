@@ -1,0 +1,70 @@
+paper: Mapping cell-to-tissue graphs across human placenta histology whole slide images using deep learning with HAPPY
+doi: 10.1038/s41467-024-46986-2
+repository:
+  tag: v1.0.0
+  commit: 9ece11c1988cf498dc2e99484a990394b3139efd
+data:
+  zenodo_concept_record: https://zenodo.org/records/10535021
+  zenodo_version_record: https://zenodo.org/records/10535022
+  graph_slides: https://www.ebi.ac.uk/biostudies/bioimages/studies/S-BIAD1045
+  preserve_original_splits: true
+  trained_weights_allowed_as_initialization: false
+experiments:
+  nuclei:
+    architecture: RetinaNet-ResNet101
+    implementation_initialization: ImageNet backbone, randomly initialized detection heads (v1.0.0 code)
+    paper_text_initialization: COCO (Methods/README; conflicts with implementation and Data Availability statement)
+    stages:
+      - epochs: 40
+        learning_rate: 0.0001
+        decay_gamma: 0.5
+        decay_step_epochs: 20
+        freeze_backbone: true
+      - epochs: 60
+        learning_rate: 0.001
+        decay_gamma: 0.5
+        decay_step_epochs: 20
+        freeze_backbone: false
+    train_validation_test_nuclei: [11755, 2374, 2754]
+    train_validation_test_images: [176, 38, 38]
+    matching_distance_um: 3.3
+    reported_test_f1: 0.884
+  cell:
+    architecture: ResNet-50
+    initialization: ImageNet
+    classes: 11
+    class_ids: [CYT, FIB, HOF, SYN, VEN, MAT, VMY, WBC, MES, EVT, KNT]
+    stages:
+      - epochs: 60
+        learning_rate: 0.0001
+        decay_gamma: 0.5
+        decay_step_epochs: 20
+        freeze_backbone: true
+      - epochs: 100
+        learning_rate: 0.0001
+        decay_gamma: 0.5
+        decay_step_epochs: 20
+        freeze_backbone: false
+    test_cells: 2743
+    reported_accuracy: 0.8429
+    reported_top2_accuracy: 0.9490
+    reported_macro_roc_auc_ovo: 0.9773
+  tissue:
+    architecture: ClusterGCN with 16 GraphSAGEConv layers
+    initialization: random
+    classes: 9
+    paper_class_ids: [Sprout, TVilli, MIVilli, AVilli, SVilli, Chorion, Maternal, Fibrin, Avascular]
+    epochs: 2000
+    hidden_units: 256
+    batch_size: 200
+    subgraph_sampling_size: 400
+    learning_rate: 0.001
+    graph: intersection of kNN (k=5) and Delaunay, plus self-loops
+    splits: original spatial val_patches.csv and test_patches.csv (verify archive names)
+    published_test_node_counts:
+      abstract_and_supplementary_table_7: 179095
+      results_text_and_repository_readme: 149425
+    reported_accuracy: 0.6834
+    reported_top2_accuracy: 0.9114
+    reported_top3_accuracy: 0.9710
+    reported_macro_roc_auc_ovo: 0.8868

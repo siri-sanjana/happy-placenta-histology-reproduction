@@ -1,0 +1,5 @@
+# Optional readers for raw whole-slide-image processing, separate from tile/embedding training.
+# python-bioformats builds python-javabridge and requires a compatible JDK/JVM.
+openslide-python==1.2.0
+python-bioformats==4.0.7
+pyvips==2.1.14
