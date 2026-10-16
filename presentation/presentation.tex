@@ -187,54 +187,92 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 4: Base Paper Overview (Section 2: Base Paper - Part 1)
+% Slide 4: Stage 1 Architecture (RetinaNet)
 % ------------------------------------------------------------------------------
-\begin{frame}{Base Paper Overview: HAPPY Framework}
-\begin{block}{Base Paper Citation}
-  \small
-  \textbf{Title:} \textit{A hierarchical approach for whole slide histology phenotyping of the human placenta (HAPPY)} \\
-  \textbf{Authors:} R. Vanea, G. H. Verghese, P. D. A. Higgins, et al. \\
-  \textbf{Journal / Year:} \textit{Nature Communications}, Vol. 15, Article 1968 (2024). \quad
-  \textbf{DOI:} \href{https://doi.org/10.1038/s41467-024-46387-w}{10.1038/s41467-024-46387-w}
-\end{block}
+\begin{frame}{Stage 1 Base Architecture: RetinaNet Nuclear Localisation}
+% Full Sequential Layer Pipeline Diagram
+\begin{center}
+\resizebox{0.96\textwidth}{!}{
+\begin{tikzpicture}[
+    node distance=0.45cm and 0.4cm,
+    font=\sffamily,
+    tile/.style={rectangle, draw=AmritaBlue, fill=LightBlue, thick, rounded corners=2pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny},
+    back/.style={rectangle, draw=MedBlue, fill=MedBlue, text=white, thick, rounded corners=3pt, minimum width=1.6cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    fpn/.style={rectangle, draw=AccentCyan!80!black, fill=AccentCyan!25, thick, rounded corners=2pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    anch/.style={rectangle, draw=MedBlue!80, fill=MedBlue!15, thick, rounded corners=2pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny},
+    sub/.style={rectangle, draw=MedBlue, fill=MedBlue, text=white, thick, rounded corners=3pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    nms/.style={rectangle, draw=SuccessGreen, fill=SuccessGreen, text=white, thick, rounded corners=3pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick, color=AmritaBlue}
+]
+  \node[tile] (in) {WSI Tile\\$1024\times 1024\times 3$};
+  \node[back, right=of in] (bb) {ResNet-101\\Backbone\\$\{C_3, C_4, C_5\}$};
+  \node[fpn, right=of bb] (fpn) {Feature Pyramid\\Network (FPN)\\$\{P_3 \text{ to } P_7\}$};
+  \node[anch, right=of fpn] (anch) {Multi-Scale\\Anchors\\($3\text{ scales}\times 3\text{ ratios}$)};
+  \node[sub, right=of anch] (sub) {Class + Box\\Subnets\\($4\times\text{Conv}$ 256-d)};
+  \node[nms, right=of sub] (out) {NMS Filtering\\(IoU $\ge 0.5$)\\\textbf{Nuclear Centroids}};
 
-\vspace{0.2cm}
+  \draw[arrow] (in) -- (bb);
+  \draw[arrow] (bb) -- (fpn);
+  \draw[arrow] (fpn) -- (anch);
+  \draw[arrow] (anch) -- (sub);
+  \draw[arrow] (sub) -- (out);
+\end{tikzpicture}
+}
+\end{center}
+
+\vspace{-0.1cm}
 
 \begin{columns}[onlytextwidth, t]
-  \begin{column}{0.31\textwidth}
-    \begin{exampleblock}{Stage 1: Localisation}
-      \parbox[t][2.2cm][t]{\linewidth}{
-        \footnotesize
-        \textbf{RetinaNet Detector} \\
-        ResNet-101 FPN backbone detects bounding boxes and nuclear centroids.
+  \begin{column}{0.47\textwidth}
+    \begin{block}{FPN Lateral \& Top-Down Merging Unit}
+      \parbox[t][2.85cm][t]{\linewidth}{
+        \centering
+        \resizebox{0.80\linewidth}{!}{
+        \begin{tikzpicture}[
+            node distance=0.2cm and 0.5cm,
+            font=\sffamily,
+            bop/.style={rectangle, draw=MedBlue, fill=LightBlue, thick, rounded corners=2pt, minimum width=2.4cm, minimum height=0.45cm, align=center, font=\scriptsize},
+            sum/.style={circle, draw=AlertRed, fill=AlertRed!20, thick, minimum size=0.45cm, align=center, font=\footnotesize\bfseries},
+            barr/.style={-{Stealth[length=2mm]}, thick, color=AmritaBlue},
+            sarr/.style={-{Stealth[length=2mm]}, thick, dashed, color=AlertRed}
+        ]
+          \node[font=\scriptsize\bfseries] (c) {Bottom-Up Map $C_i$};
+          \node[bop, below=0.12cm of c] (lat) {$1\times 1\text{ Conv, 256-d Lateral}$};
+          \node[sum, below=0.12cm of lat] (add) {$\mathbf{+}$};
+          \node[bop, below=0.12cm of add] (smooth) {$3\times 3\text{ Conv, Anti-Aliasing}$};
+          \node[below=0.10cm of smooth, font=\scriptsize\bfseries] (p) {Pyramid Output $P_i$};
+
+          \node[font=\tiny\bfseries, right=0.8cm of lat] (pnext) {$P_{i+1}$ (Coarser)};
+          \node[font=\tiny, below=0.1cm of pnext] (up) {$2\times\text{ Upsample}$};
+
+          \draw[barr] (c) -- (lat);
+          \draw[barr] (lat) -- (add);
+          \draw[barr] (add) -- (smooth);
+          \draw[barr] (smooth) -- (p);
+          \draw[sarr] (pnext) -- (up);
+          \draw[sarr] (up) |- (add.east);
+        \end{tikzpicture}
+        }
       }
-    \end{exampleblock}
+    \end{block}
   \end{column}
   \hfill
-  \begin{column}{0.31\textwidth}
-    \begin{exampleblock}{Stage 2: Cell Typing}
-      \parbox[t][2.2cm][t]{\linewidth}{
-        \footnotesize
-        \textbf{ResNet-50 Classifier} \\
-        Classifies patches into 11 lineages and extracts 64-dim embeddings.
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Key Architectural Principles in Stage 1}
+      \parbox[t][2.85cm][t]{\linewidth}{
+        \begin{itemize}\scriptsize
+          \item \textbf{Multi-Scale Resolution}: FPN levels ($P_3$--$P_7$) provide strides 8 to 128, detecting nuclei across varied magnifications ($5\,\mu\text{m}$ to $30\,\mu\text{m}$).
+          \item \textbf{Class Imbalance Mitigation}: Focal Loss downweights trivial background patches, focusing gradients on true nuclear contours.
+          \item \textbf{Centroid Extraction}: Non-Maximum Suppression (NMS) outputs precise nuclear centroids $(x, y)$ that anchor Stage 2 patch cropping.
+        \end{itemize}
       }
-    \end{exampleblock}
-  \end{column}
-  \hfill
-  \begin{column}{0.31\textwidth}
-    \begin{exampleblock}{Stage 3: Tissue Graphs}
-      \parbox[t][2.2cm][t]{\linewidth}{
-        \footnotesize
-        \textbf{ClusterGCN Network} \\
-        Constructs spatial graph ($k$-NN $\cap$ Delaunay) to segment microenvironments.
-      }
-    \end{exampleblock}
+    \end{block}
   \end{column}
 \end{columns}
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 5: Base Paper Architecture Diagram (Section 2: Base Paper - Part 2)
+% Slide 5: Stage 2 Architecture (ResNet-50)
 % ------------------------------------------------------------------------------
 \begin{frame}{Stage 2 Base Architecture: ResNet-50 Deep Residual Network}
 % Full Sequential Layer Pipeline Diagram
@@ -310,7 +348,7 @@
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Key Architectural Principles in HAPPY}
+    \begin{block}{Key Architectural Principles in Stage 2}
       \parbox[t][2.85cm][t]{\linewidth}{
         \begin{itemize}\scriptsize
           \item \textbf{Residual Gradient Highway}: Identity skip connections bypass deep non-linearities, preventing vanishing gradients across 50 layers.
@@ -324,7 +362,97 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 6: Replicated vs. Reported Benchmark Results (Section 2: Base Paper - Part 3)
+% Slide 6: Stage 3 Architecture (ClusterGCN)
+% ------------------------------------------------------------------------------
+\begin{frame}{Stage 3 Base Architecture: ClusterGCN Spatial Tissue Graphs}
+% Full Sequential Layer Pipeline Diagram
+\begin{center}
+\resizebox{0.96\textwidth}{!}{
+\begin{tikzpicture}[
+    node distance=0.45cm and 0.4cm,
+    font=\sffamily,
+    nuc/.style={rectangle, draw=AmritaBlue, fill=LightBlue, thick, rounded corners=2pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny},
+    topol/.style={rectangle, draw=MedBlue!80, fill=MedBlue!15, thick, rounded corners=2pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny},
+    metis/.style={rectangle, draw=MedBlue, fill=MedBlue, text=white, thick, rounded corners=3pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    gcn/.style={rectangle, draw=AccentCyan!80!black, fill=AccentCyan!25, thick, rounded corners=2pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    lin/.style={rectangle, draw=MedBlue, fill=MedBlue, text=white, thick, rounded corners=3pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    tiss/.style={rectangle, draw=SuccessGreen, fill=SuccessGreen, text=white, thick, rounded corners=3pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick, color=AmritaBlue}
+]
+  \node[nuc] (nin) {Nuclear Centroids\\$(x_i, y_i) \in \mathbb{R}^2$};
+  \node[topol, right=of nin] (top) {Graph Topology\\$k\text{-NN} \cap \text{Delaunay}$\\$5\text{M+ Edges}$};
+  \node[metis, right=of top] (met) {METIS Graph\\Partitioning\\$K$ Subgraphs};
+  \node[gcn, right=of met] (gcn) {16-Layer GCN\\Message Passing\\+ Residual Skips};
+  \node[lin, right=of gcn] (head) {Linear Classifier\\$64 \rightarrow 8$ Micro-\\environments};
+  \node[tiss, right=of head] (nout) {Tissue Labels\\Villi, Decidua,\\Fibrin, Avascular};
+
+  \draw[arrow] (nin) -- (top);
+  \draw[arrow] (top) -- (met);
+  \draw[arrow] (met) -- (gcn);
+  \draw[arrow] (gcn) -- (head);
+  \draw[arrow] (head) -- (nout);
+\end{tikzpicture}
+}
+\end{center}
+
+\vspace{-0.1cm}
+
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
+    \begin{block}{GCN Message-Passing Residual Unit}
+      \parbox[t][2.85cm][t]{\linewidth}{
+        \centering
+        \resizebox{0.68\linewidth}{!}{
+        \begin{tikzpicture}[
+            node distance=0.15cm and 0.35cm,
+            font=\sffamily,
+            node_c/.style={circle, draw=MedBlue, fill=MedBlue, text=white, thick, minimum size=0.6cm, align=center, font=\scriptsize\bfseries},
+            node_n/.style={circle, draw=AmritaBlue, fill=LightBlue, thick, minimum size=0.45cm, align=center, font=\tiny},
+            op/.style={rectangle, draw=MedBlue, fill=LightBlue, thick, rounded corners=2pt, minimum width=2.4cm, minimum height=0.42cm, align=center, font=\scriptsize},
+            sum/.style={circle, draw=AlertRed, fill=AlertRed!20, thick, minimum size=0.42cm, align=center, font=\footnotesize\bfseries},
+            barr/.style={-{Stealth[length=2mm]}, thick, color=AmritaBlue},
+            sarr/.style={-{Stealth[length=2mm]}, thick, dashed, color=AlertRed}
+        ]
+          \node[node_c] (v) {$v$};
+          \node[node_n, above left=0.20cm and 0.30cm of v] (u1) {$u_1$};
+          \node[node_n, above right=0.20cm and 0.30cm of v] (u2) {$u_2$};
+          \node[node_n, left=0.45cm of v] (u3) {$u_3$};
+
+          \draw[barr] (u1) -- (v);
+          \draw[barr] (u2) -- (v);
+          \draw[barr] (u3) -- (v);
+
+          \node[op, below=0.14cm of v] (agg) {$\sum_{u} \frac{1}{\sqrt{\tilde{d}_v \tilde{d}_u}} \mathbf{W}^{(l)} \mathbf{h}_u^{(l)}$};
+          \node[sum, below=0.10cm of agg] (add) {$\mathbf{+}$};
+          \node[below=0.08cm of add, font=\scriptsize\bfseries] (out) {$\mathbf{h}_v^{(l+1)} = \text{ReLU}(\text{Agg} + \mathbf{h}_v^{(l)})$};
+
+          \draw[barr] (v) -- (agg);
+          \draw[barr] (agg) -- (add);
+          \draw[barr] (add) -- (out);
+
+          \draw[sarr] (v.east) -- ++(1.3,0) |- (add.east) node[midway, right=1pt, font=\tiny\bfseries] {Skip $\mathbf{h}_v^{(l)}$};
+        \end{tikzpicture}
+        }
+      }
+    \end{block}
+  \end{column}
+  \hfill
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Key Architectural Principles in Stage 3}
+      \parbox[t][2.85cm][t]{\linewidth}{
+        \begin{itemize}\scriptsize
+          \item \textbf{Spatial Topology}: $k\text{-NN} \cap \text{Delaunay}$ links physically contiguous cells, filtering distant spurious edges across villous lumens.
+          \item \textbf{Cluster-Based Scaling}: METIS graph decomposition partitions $144{,}000+$ node graphs into stochastic clusters, preventing GPU VRAM exhaustion.
+          \item \textbf{16-Layer Deep Propagation}: Residual graph connections allow multi-hop cellular interactions, capturing macro-tissue pathology across full villi.
+        \end{itemize}
+      }
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% ------------------------------------------------------------------------------
+% Slide 7: Replicated vs. Reported Benchmark Results
 % ------------------------------------------------------------------------------
 \begin{frame}{Replicated vs. Reported Benchmark Results}
 \begin{table}[h]
@@ -353,7 +481,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 7: Task-Specific Analysis & Confusion Matrix (Section 2 - Part 4)
+% Slide 8: Task-Specific Analysis & Confusion Matrix Breakdown
 % ------------------------------------------------------------------------------
 \begin{frame}{Task-Specific Analysis \& Resolution of Paper Discrepancies}
 \begin{columns}[onlytextwidth, t]
@@ -383,7 +511,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 8: Implementation Architecture & Engineering Solutions (Section 3)
+% Slide 9: Implementation Architecture & Engineering Solutions
 % ------------------------------------------------------------------------------
 \begin{frame}{Implementation Architecture \& Engineering Bottlenecks}
 \begin{columns}[onlytextwidth, t]
@@ -414,7 +542,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 9: Training Settings & Hardware Configuration (Section 3 - Part 2)
+% Slide 10: Training Settings & Computational Environment
 % ------------------------------------------------------------------------------
 \begin{frame}{Training Settings \& Computational Environment}
 \begin{columns}[onlytextwidth, t]
@@ -448,7 +576,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 10: Proposed Architectural Modification (Section 4: Modification - Part 1)
+% Slide 11: Proposed Architectural Modification
 % ------------------------------------------------------------------------------
 \begin{frame}{Proposed Modification: Attention \& Loss Optimization}
 \begin{columns}[onlytextwidth, t]
@@ -483,7 +611,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 11: Modified Architecture Diagram (Section 4: Modification - Part 2)
+% Slide 12: Modified Architecture Diagram
 % ------------------------------------------------------------------------------
 \begin{frame}{Modified Architecture Diagram}
 \begin{center}
@@ -522,7 +650,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 12: Baseline vs. Modified Model Comparison (Section 4 - Part 3)
+% Slide 13: Baseline vs. Modified Model Comparison
 % ------------------------------------------------------------------------------
 \begin{frame}{Comparison Table: Baseline vs. Modified Architecture}
 \begin{table}[h]
@@ -552,7 +680,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 13: Component-by-Component Ablation Study (Section 4 - Part 4)
+% Slide 14: Component-by-Component Ablation Study
 % ------------------------------------------------------------------------------
 \begin{frame}{Ablation Study: Quantifying Component Contributions}
 \begin{table}[h]
@@ -585,52 +713,21 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 14: Medical Analysis & Class Imbalance Insights (Section 4 - Part 5)
+% Slide 15: Clinical Imbalance Insights, Conclusion & Contributions
 % ------------------------------------------------------------------------------
-\begin{frame}{Medical Image Analysis and Class Imbalance Insights}
+\begin{frame}{Clinical Insights, Conclusion and Contributions}
 \begin{columns}[onlytextwidth, t]
   \begin{column}{0.47\textwidth}
-    \begin{block}{Why Minority Classes Suffer in Pathology}
-      \parbox[t][4.8cm][t]{\linewidth}{
-        \begin{itemize}\footnotesize
-          \item \textbf{Dominant Classes}: Syncytiotrophoblasts comprise $>23.5\%$ of all nuclei; standard Cross-Entropy minimizes majority loss and ignores minority cells.
-          \item \textbf{Clinical Cost}: Missing maternal decidua or immune Hofbauer cells conceals chorioamnionitis or chronic histiocytic intervillositis.
-          \item \textbf{Focal Attention Relief}: Modulating factor $(1-p_t)^\gamma$ eliminates simple cell gradients.
-        \end{itemize}
-      }
-    \end{block}
-  \end{column}
-  \hfill
-  \begin{column}{0.47\textwidth}
-    \begin{exampleblock}{Qualitative \& Clinical Impact}
-      \parbox[t][4.8cm][t]{\linewidth}{
-        \begin{itemize}\footnotesize
-          \item \textbf{Maternal Decidua Recall}: Increased from \textbf{54.5\% to 59.1\%} (+4.6\% clinical sensitivity gain).
-          \item \textbf{Hofbauer Cell Recall}: Improved from \textbf{62.2\% to 66.7\%} (+4.5\% sensitivity gain).
-          \item \textbf{Channel Attention}: Dynamically enhances chromatic channels representing nuclear hyperchromasia and nucleoli prominent in pathology.
-        \end{itemize}
-      }
-    \end{exampleblock}
-  \end{column}
-\end{columns}
-\end{frame}
-
-% ------------------------------------------------------------------------------
-% Slide 15: Conclusion, Contributions & References (Closing Slide)
-% ------------------------------------------------------------------------------
-\begin{frame}{Conclusion, Team Contributions and References}
-\begin{columns}[onlytextwidth, t]
-  \begin{column}{0.47\textwidth}
-    \begin{block}{Summary and Future Work}
+    \begin{block}{Clinical Imbalance \& Diagnostic Safety}
       \parbox[t][2.2cm][t]{\linewidth}{
-        \begin{itemize}\scriptsize
-          \item \textbf{Full Reproduction}: Exact match on Stage 2 (84.29\%) and high fidelity on Stage 3 (67.75\%).
-          \item \textbf{Novelty}: Attention + Mish + Focal Loss delivered \textbf{+0.47\% accuracy boost}.
-          \item \textbf{Future Work}: Dynamic Graph Attention (GATv2) for whole-slide villous modeling.
+        \begin{itemize}\tiny
+          \item \textbf{$>14:1$ Skew}: Syncytiotrophoblasts dominate over rare maternal decidua (44) and immune Hofbauer cells (45).
+          \item \textbf{Clinical Recall Boost}: Our model boosted Decidua recall from \textbf{54.5\% to 59.1\%} (+4.6\%) and Hofbauer from \textbf{62.2\% to 66.7\%} (+4.5\%).
+          \item \textbf{Attention Efficacy}: Channel recalibration accents nuclear hyperchromasia channels critical in pathology.
         \end{itemize}
       }
     \end{block}
-    \vspace{0.15cm}
+    \vspace{0.12cm}
     \begin{block}{Key References}
       \parbox[t][1.9cm][t]{\linewidth}{
         \tiny
@@ -652,7 +749,7 @@
         \end{itemize}
       }
     \end{exampleblock}
-    \vspace{0.15cm}
+    \vspace{0.12cm}
     \begin{center}
       \textbf{\textcolor{AmritaBlue}{\large Thank You!}} \\
       \vspace{0.05cm}
