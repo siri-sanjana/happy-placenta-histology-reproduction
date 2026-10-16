@@ -16,20 +16,23 @@
 \def\textpagefraction{.001}
 
 \shorttitle{Hierarchical Phenotyping of Placenta Histology \& Attention-Enhanced Classification}
-\shortauthors{Varshitha M. and Siri Sanjana K.}
+\shortauthors{V. Thilak Kumar, S. S. Sanjana, and S. Arun}
 
 \title [mode = title]{Hierarchical Cellular-to-Tissue Phenotyping of Human Placenta Histology: Full Pipeline Replication and Attention-Enhanced Cell Classification}
 
-\author[1]{Varshitha M.}[type=editor, auid=000, bioid=1, prefix=Ms.]
+\author[1]{Varshitha Thilak Kumar}[type=editor, auid=000, bioid=1, prefix=Ms.]
 \cormark[1]
 \credit{Investigation, Methodology, Software, Validation, Formal analysis, Writing - Original Draft}
 
-\author[1]{Siri Sanjana K.}[prefix=Ms.]
+\author[1]{Siri Sanjana S}[prefix=Ms.]
 \credit{Conceptualization, Software, Data curation, Visualization, Writing - Review \& Editing}
+
+\author[1]{Shreya Arun}[prefix=Ms.]
+\credit{Formal analysis, Software, Validation, Visualization, Writing - Review \& Editing}
 
 \address[1]{Amrita School of Artificial Intelligence, Amrita Vishwa Vidyapeetham, Coimbatore, Tamil Nadu, 641112, India}
 
-\cortext[cor1]{Corresponding author: Varshitha M. (\texttt{varshitha.9a2019@gmail.com}); Co-author: Siri Sanjana K. (\texttt{sirisanjana@am.students.amrita.edu})}
+\cortext[cor1]{Corresponding author: Varshitha Thilak Kumar (\texttt{varshitha.9a2019@gmail.com}, Roll No: CB.SC.U4AIE23258). Co-authors: Siri Sanjana S (\texttt{sirisanjana@am.students.amrita.edu}, Roll No: CB.SC.U4AIE23249), Shreya Arun (\texttt{shreyaarun@am.students.amrita.edu}, Roll No: CB.SC.U4AIE23253).}
 
 \begin{abstract}
 Whole slide histological examination of the human placenta provides critical diagnostic indicators for maternal-fetal complications, including preeclampsia and fetal growth restriction (FGR). However, gigapixel slide dimensions, dense cellular heterogeneity, and severe inter-observer discordance hinder routine quantitative assessment. In this work, we reproduce and enhance the bottom-up hierarchical framework proposed by Vanea et al. (\textit{Nature Communications}, 2024; HAPPY), which systematically links nuclear localization (RetinaNet), single-cell phenotyping (ResNet-50), and graph-based tissue microenvironment classification (ClusterGCN). We achieve an exact reproduction of the published benchmarks on the official held-out test splits: Stage 2 cell classification achieved an exact match across test accuracy (84.29\%), top-2 accuracy (94.90\%), and macro ROC-AUC (0.9773) on 2,743 cells across three clinical cohorts (HMC, UOT, NUH). Furthermore, Stage 3 tissue graph phenotyping closely matched the published benchmark with 67.75\% accuracy (vs. 68.34\% published) and 0.8820 macro ROC-AUC across 144,241 labeled nodes on the spatial test split. To address extreme placental cell class imbalance (>14:1 ratio between syncytiotrophoblasts and rare maternal decidua/Hofbauer cells) and feature channel insensitivity, we propose a novel architectural modification: a Residual Channel Attention Module (Squeeze-and-Excitation), smooth non-monotonic Mish activation functions, and class-weighted Multi-Class Focal Loss ($\gamma = 2.0$). In a controlled ablation study on identical test splits, our proposed model achieves 84.21\% accuracy (+0.47\% over the retrained baseline), significantly improving minority cell discrimination and clinical safety margins.
@@ -190,8 +193,9 @@ In this project, we successfully reproduced the multi-stage deep learning pipeli
 Future work will investigate extending dynamic attention to Stage 3 by incorporating edge-distance weighted Graph Attention Networks (GATv2) to capture physical cell-to-cell signaling gradients across whole placental villi.
 
 \section*{CRediT Author Statement}
-\textbf{Varshitha M.}: Conceptualization, Software, Environment Configuration, Stage 1 \& Stage 2 Model Evaluation, Channel Attention Architecture Design, Formal Analysis, Writing - Original Draft. \\
-\textbf{Siri Sanjana K.}: Methodology, 64-bit Graph Intersection Fix, Stage 3 ClusterGCN Evaluation, Focal Loss Implementation, Validation, Visualization, Writing - Review \& Editing.
+\textbf{Varshitha Thilak Kumar (CB.SC.U4AIE23258)}: Conceptualization, Software, Environment Configuration, Stage 1 \& Stage 2 Model Evaluation, Channel Attention Architecture Design, Formal Analysis, Writing - Original Draft. \\
+\textbf{Siri Sanjana S (CB.SC.U4AIE23249)}: Methodology, Spatial Interaction Graph Pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit Bit-Packed Intersection Fix, Stage 3 ClusterGCN Evaluation, Validation, Writing - Review \& Editing. \\
+\textbf{Shreya Arun (CB.SC.U4AIE23253)}: Multi-Class Focal Loss Implementation, Mish Activation Function, Ablation Study Execution, Qualitative Visualization, Data Analysis, Writing - Review \& Editing.
 
 \section*{Declaration of Competing Interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
