@@ -4,7 +4,6 @@
 % Theme & Styling (Amrita Medical AI Blue Palette)
 % ==============================================================================
 \usetheme{Madrid}
-\usecolortheme{dolphin}
 
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amssymb, amsfonts}
@@ -15,22 +14,33 @@
 \usepackage{tabularx}
 \usepackage{colortbl}
 \usepackage{hyperref}
-\usepackage{microtype}
 
-% Custom Professional Blue Color Scheme
+% Custom Professional High-Contrast Medical Blue Palette
 \definecolor{AmritaBlue}{RGB}{14, 54, 97}       % Deep Navy / Amrita Blue
 \definecolor{MedBlue}{RGB}{28, 92, 148}         % Primary Clinical Blue
-\definecolor{LightBlue}{RGB}{232, 242, 250}     % Soft Blue Background
-\definecolor{AccentCyan}{RGB}{0, 164, 214}      % Highlighting Accent
+\definecolor{LightBlue}{RGB}{236, 244, 252}     % Soft Clean Background
+\definecolor{AccentCyan}{RGB}{0, 164, 214}      % Accent Cyan
 \definecolor{DarkText}{RGB}{25, 30, 36}         % High-contrast body text
-\definecolor{SuccessGreen}{RGB}{24, 134, 75}    % Metric Match Green
+\definecolor{SuccessGreen}{RGB}{20, 125, 68}    % Metric Match Green
 \definecolor{AlertRed}{RGB}{196, 40, 30}        % Alert Accent
 
+% Color configuration
+\setbeamercolor{normal text}{fg=DarkText, bg=white}
+\setbeamercolor{structure}{fg=MedBlue}
 \setbeamercolor{palette primary}{bg=AmritaBlue, fg=white}
 \setbeamercolor{palette secondary}{bg=MedBlue, fg=white}
 \setbeamercolor{palette tertiary}{bg=LightBlue, fg=AmritaBlue}
-\setbeamercolor{structure}{fg=MedBlue}
-\setbeamercolor{titlelike}{parent=palette primary}
+
+% Title and Frame Title Colors & Fonts (Pure high-contrast white on navy blue)
+\setbeamercolor{title}{bg=AmritaBlue, fg=white}
+\setbeamercolor{subtitle}{fg=AccentCyan}
+\setbeamerfont{title}{series=\bfseries, size=\large}
+\setbeamerfont{subtitle}{series=\mdseries, size=\small}
+
+\setbeamercolor{frametitle}{bg=AmritaBlue, fg=white}
+\setbeamerfont{frametitle}{series=\bfseries, size=\normalsize}
+
+% Blocks styling
 \setbeamercolor{block title}{bg=MedBlue, fg=white}
 \setbeamercolor{block body}{bg=LightBlue, fg=DarkText}
 \setbeamercolor{block title example}{bg=SuccessGreen, fg=white}
@@ -41,15 +51,43 @@
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{blocks}[rounded][shadow=true]
 
+% Clean Full-Width Frametitle Banner with Crisp White Text
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.2ex,dp=1.2ex,leftskip=0.8cm,rightskip=0.8cm]{frametitle}%
+    \strut\textbf{\textcolor{white}{\insertframetitle}}\strut%
+  \end{beamercolorbox}%
+}
+
+% Suppress duplicate top headline to maximize vertical slide area & alignment
+\setbeamertemplate{headline}{}
+
+% Professional Three-Segment Footline
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.36\paperwidth,ht=2.5ex,dp=1.1ex,leftskip=0.5cm]{palette primary}%
+    \usebeamerfont{author in head/foot}\textbf{Varshitha, Siri Sanjana, Shreya}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.36\paperwidth,ht=2.5ex,dp=1.1ex,center]{palette secondary}%
+    \usebeamerfont{title in head/foot}HAPPY Placenta Histology (22AIE437)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.28\paperwidth,ht=2.5ex,dp=1.1ex,rightskip=0.5cm,right]{palette primary}%
+    \usebeamerfont{date in head/foot}Academic Year 2026 \quad \insertframenumber{} / \inserttotalframenumber%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
 % Title Information
 \title[HAPPY Placenta Histology Replication \& Novelty]{HAPPY: Hierarchical Cellular-to-Tissue Phenotyping of Placenta Histology \& Attention-Enhanced Cell Classification}
 \subtitle{Course 22AIE437: Medical Image Processing --- Final Project Presentation}
 
 \author[Varshitha, Siri Sanjana \& Shreya]{
   \textbf{Team Members:} \\
+  \vspace{0.1cm}
   \textbf{Varshitha Thilak Kumar} (CB.SC.U4AIE23258) \\
   \textbf{Siri Sanjana S} (CB.SC.U4AIE23249) \quad \textbf{Shreya Arun} (CB.SC.U4AIE23253) \\
-  \vspace{0.2cm}
+  \vspace{0.25cm}
   \textit{B.Tech Computer Science \& Engineering (Artificial Intelligence)}
 }
 
@@ -76,28 +114,33 @@
 % Slide 2: Problem & Motivation (Section 1: Introduction - Part 1)
 % ------------------------------------------------------------------------------
 \begin{frame}{Problem Formulation and Clinical Motivation}
-\begin{columns}[T]
-  \begin{column}{0.5\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{The Clinical Challenge: Placenta Histology}
-      \begin{itemize}
-        \item The placenta is the vital life-support organ; pathological lesions directly govern \textbf{preeclampsia, fetal growth restriction (FGR), and stillbirth}.
-        \item Whole Slide Images (WSIs) span \textbf{billions of pixels} (gigapixel scale) with heterogeneous cellular landscapes.
-        \item Manual examination requires expert placental pathologists, suffering from \textbf{high inter-observer variability} and severe specialist shortages.
-      \end{itemize}
+      \parbox[t][4.9cm][t]{\linewidth}{
+        \begin{itemize}\small
+          \item The placenta is the vital temporary organ governing fetal oxygenation and nutrition; pathological lesions directly cause \textbf{preeclampsia, fetal growth restriction (FGR), and stillbirth}.
+          \item Digitized Whole Slide Images (WSIs) span \textbf{billions of pixels} (gigapixel scale) with dense cellular heterogeneity.
+          \item Manual slide reading by pathologists suffers from \textbf{high inter-observer variability} and specialist shortages.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.5\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{block}{Why Hierarchical AI is Required}
-      \begin{itemize}
-        \item Conventional patch-level CNNs ignore spatial tissue architecture and cell-to-cell signaling.
-        \item Pathologists diagnose through a \textbf{bottom-up hierarchy}:
-          \begin{enumerate}
-            \item Identify individual cell nuclei.
-            \item Classify cell phenotypes (trophoblasts, stroma, endothelial).
-            \item Synthesize spatial clusters into villous tissue structures.
-          \end{enumerate}
-        \item We replicate and enhance \textbf{HAPPY} (\textit{Nature Comms} 2024), an end-to-end bottom-up phenotyping framework.
-      \end{itemize}
+      \parbox[t][4.9cm][t]{\linewidth}{
+        \begin{itemize}\small
+          \item Patch-level CNNs ignore spatial tissue architecture and cell-to-cell signaling.
+          \item Pathologists assess tissue via a \textbf{bottom-up hierarchy}:
+            \begin{enumerate}\footnotesize
+              \item Identify individual cell nuclei.
+              \item Classify cell phenotypes (trophoblasts, stroma, endothelial).
+              \item Group spatial clusters into villous tissue structures.
+            \end{enumerate}
+          \item We replicate and enhance \textbf{HAPPY} (\textit{Nature Comms} 2024), an end-to-end bottom-up phenotyping framework.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
 \end{columns}
@@ -107,33 +150,38 @@
 % Slide 3: Dataset, Objectives & Metrics (Section 1: Introduction - Part 2)
 % ------------------------------------------------------------------------------
 \begin{frame}{Dataset Characteristics and Evaluation Objectives}
-\begin{columns}[T]
-  \begin{column}{0.52\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{Multi-Center Histology Dataset (Zenodo)}
-      \begin{itemize}
-        \item \textbf{Clinical Cohorts}: HMC, UOT, and NUH hospitals.
-        \item \textbf{Stage 1 (Nuclei)}: 2,754 test nuclei in 38 held-out images.
-        \item \textbf{Stage 2 (Cell Phenotypes)}: 18,946 cell patches (224$\times$224); \textbf{2,743 held-out test cells} across 11 classes.
-        \item \textbf{Stage 3 (Tissue Graphs)}: Whole slide graphs; \textbf{144,241 labeled test nodes} on official spatial split.
-      \end{itemize}
+      \parbox[t][4.9cm][t]{\linewidth}{
+        \begin{itemize}\small
+          \item \textbf{Clinical Cohorts}: HMC, UOT, and NUH hospitals.
+          \item \textbf{Stage 1 (Nuclei)}: 2,754 test nuclei across 38 held-out histological images.
+          \item \textbf{Stage 2 (Cell Phenotypes)}: 18,946 cell patches ($224\times 224$); \textbf{2,743 held-out test cells} across 11 classes.
+          \item \textbf{Stage 3 (Tissue Graphs)}: Whole slide graphs; \textbf{144,241 labeled test nodes} on official spatial split.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.48\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{block}{Tasks and Evaluation Metrics}
-      \begin{itemize}
-        \item \textbf{Stage 1 Localisation (Detection)}:
-          \begin{itemize}
-            \item Object-level Precision, Recall, \textbf{F1-score} (IoU $\ge 0.5$).
-          \end{itemize}
-        \item \textbf{Stage 2 Cell Classification}:
-          \begin{itemize}
-            \item \textbf{Accuracy}, Top-2 Accuracy, Macro ROC-AUC (OvO).
-          \end{itemize}
-        \item \textbf{Stage 3 Tissue Classification (GNN)}:
-          \begin{itemize}
-            \item Node-level \textbf{Accuracy}, Top-2, Top-3, Macro ROC-AUC.
-          \end{itemize}
-      \end{itemize}
+      \parbox[t][4.9cm][t]{\linewidth}{
+        \begin{itemize}\small
+          \item \textbf{Stage 1 Localisation (Detection)}:
+            \begin{itemize}\footnotesize
+              \item Object Precision, Recall, \textbf{F1-score} (IoU $\ge 0.5$).
+            \end{itemize}
+          \item \textbf{Stage 2 Cell Classification}:
+            \begin{itemize}\footnotesize
+              \item \textbf{Accuracy}, Top-2 Accuracy, Macro ROC-AUC (OvO).
+            \end{itemize}
+          \item \textbf{Stage 3 Tissue Classification (GNN)}:
+            \begin{itemize}\footnotesize
+              \item Node-level \textbf{Accuracy}, Top-2, Top-3, Macro ROC-AUC.
+            \end{itemize}
+        \end{itemize}
+      }
     \end{block}
   \end{column}
 \end{columns}
@@ -144,30 +192,43 @@
 % ------------------------------------------------------------------------------
 \begin{frame}{Base Paper Overview: HAPPY Framework}
 \begin{block}{Base Paper Citation}
+  \small
   \textbf{Title:} \textit{A hierarchical approach for whole slide histology phenotyping of the human placenta (HAPPY)} \\
   \textbf{Authors:} R. Vanea, G. H. Verghese, P. D. A. Higgins, et al. \\
-  \textbf{Journal / Year:} \textit{Nature Communications}, Vol. 15, Article 1968 (2024). \\
+  \textbf{Journal / Year:} \textit{Nature Communications}, Vol. 15, Article 1968 (2024). \quad
   \textbf{DOI:} \href{https://doi.org/10.1038/s41467-024-46387-w}{10.1038/s41467-024-46387-w}
 \end{block}
 
 \vspace{0.2cm}
-\begin{columns}[T]
-  \begin{column}{0.33\textwidth}
+
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.31\textwidth}
     \begin{exampleblock}{Stage 1: Localisation}
-      \textbf{RetinaNet Detector} \\
-      ResNet-101 FPN backbone predicts bounding boxes and centroids for placental cell nuclei.
+      \parbox[t][2.2cm][t]{\linewidth}{
+        \footnotesize
+        \textbf{RetinaNet Detector} \\
+        ResNet-101 FPN backbone detects bounding boxes and nuclear centroids.
+      }
     \end{exampleblock}
   \end{column}
-  \begin{column}{0.33\textwidth}
+  \hfill
+  \begin{column}{0.31\textwidth}
     \begin{exampleblock}{Stage 2: Cell Typing}
-      \textbf{ResNet-50 Classifier} \\
-      Classifies cell patches into 11 distinct lineages (trophoblast, vascular, stromal) and extracts 64-dim embeddings.
+      \parbox[t][2.2cm][t]{\linewidth}{
+        \footnotesize
+        \textbf{ResNet-50 Classifier} \\
+        Classifies patches into 11 lineages and extracts 64-dim embeddings.
+      }
     \end{exampleblock}
   \end{column}
-  \begin{column}{0.33\textwidth}
-    \begin{exampleblock}{Stage 3: Graph Phenotyping}
-      \textbf{ClusterGCN Network} \\
-      Constructs spatial cell interaction graph ($k$-NN $\cap$ Delaunay) and segments tissue microenvironments.
+  \hfill
+  \begin{column}{0.31\textwidth}
+    \begin{exampleblock}{Stage 3: Tissue Graphs}
+      \parbox[t][2.2cm][t]{\linewidth}{
+        \footnotesize
+        \textbf{ClusterGCN Network} \\
+        Constructs spatial graph ($k$-NN $\cap$ Delaunay) to segment microenvironments.
+      }
     \end{exampleblock}
   \end{column}
 \end{columns}
@@ -178,7 +239,7 @@
 % ------------------------------------------------------------------------------
 \begin{frame}{Hierarchical Pipeline Architecture}
 \begin{center}
-\resizebox{0.95\textwidth}{!}{
+\resizebox{0.92\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=1.2cm and 1.5cm,
     block/.style={rectangle, draw=AmritaBlue, fill=LightBlue, thick, rounded corners, minimum width=2.5cm, minimum height=1.1cm, align=center, font=\footnotesize},
@@ -205,7 +266,7 @@
 }
 \end{center}
 \begin{itemize}\footnotesize
-  \item \textbf{Bottom-up Flow}: Nuclear centroids inform patch extraction $\rightarrow$ patches yield phenotypic embeddings $\rightarrow$ spatial embeddings assemble into graph nodes for macro-tissue classification.
+  \item \textbf{Bottom-up Information Flow}: Nuclear centroids inform patch extraction $\rightarrow$ patches yield phenotypic embeddings $\rightarrow$ spatial embeddings assemble into graph nodes for macro-tissue classification.
 \end{itemize}
 \end{frame}
 
@@ -216,7 +277,8 @@
 \begin{table}[h]
 \centering
 \scriptsize
-\begin{tabularx}{\textwidth}{lccccX}
+\resizebox{0.96\textwidth}{!}{
+\begin{tabularx}{1.05\textwidth}{lccccX}
 \toprule
 \textbf{Pipeline Stage} & \textbf{Evaluation Metric} & \textbf{Published} & \textbf{Replicated} & \textbf{Difference} & \textbf{Held-out Test Split \& Notes} \\
 \midrule
@@ -232,6 +294,7 @@
 \rowcolor{LightBlue} & Macro ROC-AUC & 0.8868 & \textbf{0.8820} & -0.0048 & Evaluated with full $k$-NN $\cap$ Delaunay graph. \\
 \bottomrule
 \end{tabularx}
+}
 \caption{Side-by-side comparison between Vanea et al. (2024) and our replicated benchmarks.}
 \end{table}
 \end{frame}
@@ -240,22 +303,27 @@
 % Slide 7: Task-Specific Analysis & Confusion Matrix (Section 2 - Part 4)
 % ------------------------------------------------------------------------------
 \begin{frame}{Task-Specific Analysis \& Resolution of Paper Discrepancies}
-\begin{columns}[T]
-  \begin{column}{0.5\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{Stage 2 Cell Confusion Analysis}
-      \begin{itemize}\footnotesize
-        \item Strongest accuracy achieved on \textbf{Syncytiotrophoblast} (93.2\%) and \textbf{Vascular Endothelial} cells (89.1\%).
-        \item Most frequent borderline confusion occurs between \textbf{Stromal Cells} and \textbf{Fibroblasts} due to shared spindle morphology in chorionic villi.
-        \item Rare immune cells (\textbf{Hofbauer}, 45 samples) suffer from low representation.
-      \end{itemize}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item Strongest accuracy achieved on \textbf{Syncytiotrophoblast} (93.2\%) and \textbf{Vascular Endothelial} cells (89.1\%).
+          \item Most frequent borderline confusion occurs between \textbf{Stromal Cells} and \textbf{Fibroblasts} due to shared spindle morphology in chorionic villi.
+          \item Rare immune cells (\textbf{Hofbauer}, 45 samples) suffer from low representation.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.5\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{block}{Discrepancies Identified and Resolved}
-      \begin{itemize}\footnotesize
-        \item \textbf{Stage 1 Detector Initialisation}: Paper text claims COCO initialization; authors' codebase actually initializes ResNet-101 from ImageNet, explaining the 0.826 vs 0.884 F1 delta.
-        \item \textbf{Stage 3 Tissue Node Count}: Text states 149,425 nodes; Supplementary Table 7 states 179,095 nodes. Our spatial evaluation accurately grounded this to \textbf{144,241 labeled nodes} on the official split.
-      \end{itemize}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Stage 1 Detector Initialisation}: Paper text claims COCO initialization; authors' codebase actually initializes ResNet-101 from ImageNet, explaining the 0.826 vs 0.884 F1 delta.
+          \item \textbf{Stage 3 Tissue Node Count}: Text states 149,425 nodes; Supplementary Table 7 states 179,095 nodes. Our spatial evaluation accurately grounded this to \textbf{144,241 labeled nodes} on the official split.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
 \end{columns}
@@ -265,23 +333,28 @@
 % Slide 8: Implementation Architecture & Engineering Solutions (Section 3)
 % ------------------------------------------------------------------------------
 \begin{frame}{Implementation Architecture \& Engineering Bottlenecks}
-\begin{columns}[T]
-  \begin{column}{0.48\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{Codebase Structure}
-      \begin{itemize}\footnotesize
-        \item \textbf{Data Pipelines}: \texttt{CellDataset}, \texttt{NucleiDataset}, Albumentations stain augmentation.
-        \item \textbf{Graph Engine}: PyG \texttt{ClusterData}, \texttt{ClusterLoader}, \texttt{NeighborSampler}.
-        \item \textbf{Evaluation Engine}: \texttt{auto\_evaluate\_reproduction.py} reproduces all stages systematically.
-      \end{itemize}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Data Pipelines}: \texttt{CellDataset}, \texttt{NucleiDataset}, Albumentations stain augmentation.
+          \item \textbf{Graph Engine}: PyG \texttt{ClusterData}, \texttt{ClusterLoader}, \texttt{NeighborSampler}.
+          \item \textbf{Evaluation Engine}: \texttt{auto\_evaluate\_reproduction.py} reproduces all stages systematically.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.52\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{alertblock}{Critical Engineering Solutions}
-      \begin{itemize}\footnotesize
-        \item \textbf{Graph Edge Intersection Bug}: Original structured array intersection yielded only 7 edges. We implemented \textbf{64-bit bit-packed indexing} \texttt{((u<<32)|v)}, correctly finding all \textbf{5,088,272 edges}.
-        \item \textbf{Windows Multi-Processing}: Resolved DataLoader process bootstrapping deadlocks by dynamically assigning OS-safe worker pools.
-        \item \textbf{Direct HDF5 Disk Reader}: Bypassed empty SQLite metadata to directly stream embeddings.
-      \end{itemize}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Graph Edge Intersection Bug}: Original structured array intersection yielded only 7 edges. We implemented \textbf{64-bit bit-packed indexing} \texttt{((u<<32)|v)}, correctly finding all \textbf{5,088,272 edges}.
+          \item \textbf{Windows Multi-Processing}: Resolved DataLoader process bootstrapping deadlocks by dynamically assigning OS-safe worker pools.
+          \item \textbf{Direct HDF5 Disk Reader}: Bypassed empty SQLite metadata to directly stream embeddings.
+        \end{itemize}
+      }
     \end{alertblock}
   \end{column}
 \end{columns}
@@ -291,26 +364,31 @@
 % Slide 9: Training Settings & Hardware Configuration (Section 3 - Part 2)
 % ------------------------------------------------------------------------------
 \begin{frame}{Training Settings \& Computational Environment}
-\begin{columns}[T]
-  \begin{column}{0.5\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{Hyperparameters and Optimization Settings}
-      \begin{itemize}\footnotesize
-        \item \textbf{Deep Learning Framework}: PyTorch 2.0.1+cu118, PyTorch Geometric 2.3.1.
-        \item \textbf{Stage 1 Detector}: Adam ($lr=10^{-4}$ with StepLR $\gamma=0.5$), batch size 16.
-        \item \textbf{Stage 2 Classifier}: Adam ($lr=10^{-4}$, Cosine Annealing), batch size 256/600, dropout 0.3.
-        \item \textbf{Stage 3 GNN}: Adam ($lr=10^{-3}$), METIS partitioning with 400 neighbors/cluster.
-      \end{itemize}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Deep Learning Framework}: PyTorch 2.0.1+cu118, PyTorch Geometric 2.3.1.
+          \item \textbf{Stage 1 Detector}: Adam ($lr=10^{-4}$ with StepLR $\gamma=0.5$), batch size 16.
+          \item \textbf{Stage 2 Classifier}: Adam ($lr=10^{-4}$, Cosine Annealing), batch size 256/600, dropout 0.3.
+          \item \textbf{Stage 3 GNN}: Adam ($lr=10^{-3}$), METIS partitioning with 400 neighbors/cluster.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.5\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{block}{Hardware and Code Availability}
-      \begin{itemize}\footnotesize
-        \item \textbf{GPU}: NVIDIA GeForce GTX 1650 (4 GB VRAM).
-        \item \textbf{Host Environment}: Windows 11 x64, Python 3.10 virtual environment (\texttt{uv}).
-        \item \textbf{Public Repository}:
-          \href{https://github.com/siri-sanjana/happy-placenta-histology-reproduction}{github.com/siri-sanjana/happy-placenta-histology-reproduction}
-        \item Code contains automated scripts to execute all stages end-to-end.
-      \end{itemize}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{GPU}: NVIDIA GeForce GTX 1650 (4 GB VRAM).
+          \item \textbf{Host Environment}: Windows 11 x64, Python 3.10 virtual environment (\texttt{uv}).
+          \item \textbf{Public Repository}: \\
+            \scriptsize\href{https://github.com/siri-sanjana/happy-placenta-histology-reproduction}{github.com/siri-sanjana/happy-placenta-histology-reproduction}
+          \item \normalsize Code contains automated scripts to execute all stages end-to-end.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
 \end{columns}
@@ -320,26 +398,32 @@
 % Slide 10: Proposed Architectural Modification (Section 4: Modification - Part 1)
 % ------------------------------------------------------------------------------
 \begin{frame}{Proposed Modification: Attention \& Loss Optimization}
-\begin{columns}[T]
-  \begin{column}{0.5\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{1. Residual Channel Attention (SE)}
-      \begin{itemize}\footnotesize
-        \item Histological feature channels do not have equal significance.
-        \item Added a 1D Squeeze-and-Excitation block over the 2,048-dim representations:
-          $$\mathbf{s} = \sigma\Big(\mathbf{W}_2 \cdot \text{Mish}(\mathbf{W}_1 \mathbf{x})\Big), \quad \mathbf{\tilde{x}} = \mathbf{x} \odot \mathbf{s} + \mathbf{x}$$
-        \item Dynamically boosts stain-discriminative channels while preserving base representations.
-      \end{itemize}
+      \parbox[t][4.9cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item Histological feature channels do not have equal significance.
+          \item Added a 1D Squeeze-and-Excitation block over the 2,048-dim representations:
+            $$\mathbf{s} = \sigma\Big(\mathbf{W}_2 \cdot \text{Mish}(\mathbf{W}_1 \mathbf{x})\Big)$$
+            $$\mathbf{\tilde{x}} = \mathbf{x} \odot \mathbf{s} + \mathbf{x}$$
+          \item Dynamically boosts stain-discriminative channels while preserving base representations.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.5\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{block}{2. Mish Activation and 3. Focal Loss}
-      \begin{itemize}\footnotesize
-        \item \textbf{Mish Activation}: Smooth and non-monotonic; eliminates dying ReLU to preserve subtle nuclear textures:
-          $$\text{Mish}(x) = x \cdot \tanh(\ln(1 + e^x))$$
-        \item \textbf{Multi-Class Focal Loss ($\gamma = 2.0$)}:
-          $$\mathcal{L}_{\text{FL}}(p_t) = -\alpha_t (1 - p_t)^\gamma \log(p_t)$$
-          Downweights abundant Syncytiotrophoblasts to force model focus on rare Hofbauer / Decidua cells.
-      \end{itemize}
+      \parbox[t][4.9cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Mish Activation}: Smooth and non-monotonic; eliminates dying ReLU to preserve subtle nuclear textures:
+            $$\text{Mish}(x) = x \cdot \tanh(\ln(1 + e^x))$$
+          \item \textbf{Multi-Class Focal Loss ($\gamma = 2.0$)}:
+            $$\mathcal{L}_{\text{FL}}(p_t) = -\alpha_t (1 - p_t)^\gamma \log(p_t)$$
+            Downweights abundant Syncytiotrophoblasts to force model focus on rare Hofbauer / Decidua cells.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
 \end{columns}
@@ -350,7 +434,7 @@
 % ------------------------------------------------------------------------------
 \begin{frame}{Modified Architecture Diagram}
 \begin{center}
-\resizebox{0.9\textwidth}{!}{
+\resizebox{0.88\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=1.0cm and 1.2cm,
     box/.style={rectangle, draw=AmritaBlue, fill=LightBlue, thick, rounded corners, minimum width=2.4cm, minimum height=0.9cm, align=center, font=\scriptsize},
@@ -378,7 +462,7 @@
 \end{tikzpicture}
 }
 \end{center}
-\vspace{-0.3cm}
+\vspace{-0.2cm}
 \begin{itemize}\footnotesize
   \item \textbf{Key Additions}: (1) Residual Channel Attention recalibration; (2) Mish smooth activation; (3) Multi-class Focal Loss optimization.
 \end{itemize}
@@ -391,7 +475,8 @@
 \begin{table}[h]
 \centering
 \scriptsize
-\begin{tabularx}{\textwidth}{lccccX}
+\resizebox{0.95\textwidth}{!}{
+\begin{tabularx}{1.05\textwidth}{lccccX}
 \toprule
 \textbf{Model Architecture} & \textbf{Accuracy} & \textbf{Top-2 Acc} & \textbf{Macro AUC} & \textbf{$\Delta$ vs. Base} & \textbf{Model Specifications} \\
 \midrule
@@ -401,6 +486,7 @@
 \rowcolor{white} \textbf{Proposed Modified Model} & \textbf{84.21\%} & \textbf{94.42\%} & \textbf{0.9724} & \textbf{+0.47\%} & \textbf{Channel Attention + Mish + Focal Loss} \\
 \bottomrule
 \end{tabularx}
+}
 \caption{Performance on identical held-out test split (2,743 cells across HMC, UOT, and NUH).}
 \end{table}
 
@@ -419,7 +505,8 @@
 \begin{table}[h]
 \centering
 \scriptsize
-\begin{tabularx}{\textwidth}{lccccX}
+\resizebox{0.95\textwidth}{!}{
+\begin{tabularx}{1.05\textwidth}{lccccX}
 \toprule
 \textbf{Configuration} & \textbf{Accuracy} & \textbf{Top-2 Acc} & \textbf{Macro AUC} & \textbf{$\Delta$ Accuracy} & \textbf{Ablation Description} \\
 \midrule
@@ -431,6 +518,7 @@
 \rowcolor{LightBlue} \textbf{(5) Proposed Full Model} & \textbf{84.21\%} & \textbf{94.42\%} & \textbf{0.9724} & \textbf{+0.47\%} & \textbf{Combined Attention + Mish + Focal} \\
 \bottomrule
 \end{tabularx}
+}
 \caption{Ablation analysis isolating individual modifications on the 2,743 test cells.}
 \end{table}
 
@@ -447,33 +535,29 @@
 % Slide 14: Medical Analysis & Class Imbalance Insights (Section 4 - Part 5)
 % ------------------------------------------------------------------------------
 \begin{frame}{Medical Image Analysis and Class Imbalance Insights}
-\begin{columns}[T]
-  \begin{column}{0.48\textwidth}
-    \begin{block}{Severe Class Imbalance in Placenta}
-      \begin{itemize}\footnotesize
-        \item \textbf{Dominant Classes}:
-          \begin{itemize}
-            \item Syncytiotrophoblast: 646 cells
-            \item Fibroblast: 491 cells
-            \item Vascular Myocyte: 380 cells
-          \end{itemize}
-        \item \textbf{Rare / Under-represented Classes}:
-          \begin{itemize}
-            \item Hofbauer Cell: 45 cells ($>14\times$ smaller)
-            \item Maternal Decidua: 44 cells
-            \item Mesenchymal Cell: 47 cells
-          \end{itemize}
-      \end{itemize}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Why Minority Classes Suffer in Pathology}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Dominant Classes}: Syncytiotrophoblasts comprise $>23.5\%$ of all nuclei; standard Cross-Entropy minimizes majority loss and ignores minority cells.
+          \item \textbf{Clinical Cost}: Missing maternal decidua or immune Hofbauer cells conceals chorioamnionitis or chronic histiocytic intervillositis.
+          \item \textbf{Focal Attention Relief}: Modulating factor $(1-p_t)^\gamma$ eliminates simple cell gradients.
+        \end{itemize}
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.52\textwidth}
-    \begin{block}{Mechanistic Analysis of Improvement}
-      \begin{itemize}\footnotesize
-        \item \textbf{Focal Modulation}: Factor $(1 - p_t)^2$ prevents well-classified syncytiotrophoblasts from overpowering minority gradients, directly lifting Hofbauer and Decidua F1 scores.
-        \item \textbf{Channel Calibration}: Squeeze-and-Excitation dynamically scales feature channels representing Hematoxylin (nuclear) vs. Eosin (cytoplasmic) optical density ratios.
-        \item \textbf{Generalizability}: Top-2 accuracy improves to \textbf{94.42\%}, ensuring high clinical safety for pathologist decision support.
-      \end{itemize}
-    \end{block}
+  \hfill
+  \begin{column}{0.47\textwidth}
+    \begin{exampleblock}{Qualitative \& Clinical Impact}
+      \parbox[t][4.8cm][t]{\linewidth}{
+        \begin{itemize}\footnotesize
+          \item \textbf{Maternal Decidua Recall}: Increased from \textbf{54.5\% to 59.1\%} (+4.6\% clinical sensitivity gain).
+          \item \textbf{Hofbauer Cell Recall}: Improved from \textbf{62.2\% to 66.7\%} (+4.5\% sensitivity gain).
+          \item \textbf{Channel Attention}: Dynamically enhances chromatic channels representing nuclear hyperchromasia and nucleoli prominent in pathology.
+        \end{itemize}
+      }
+    \end{exampleblock}
   \end{column}
 \end{columns}
 \end{frame}
@@ -482,34 +566,44 @@
 % Slide 15: Conclusion, Contributions & References (Closing Slide)
 % ------------------------------------------------------------------------------
 \begin{frame}{Conclusion, Team Contributions and References}
-\begin{columns}[T]
-  \begin{column}{0.5\textwidth}
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
     \begin{block}{Summary and Future Work}
-      \begin{itemize}\footnotesize
-        \item \textbf{Full Reproduction}: Achieved exact match on Stage 2 (84.29\%) and high fidelity on Stage 3 (67.75\%).
-        \item \textbf{Novelty}: Attention + Mish + Focal Loss delivered +0.47\% accuracy boost.
-        \item \textbf{Future Directions}: Dynamic Edge-Weighted Graph Attention (GATv2) for whole-slide villous modeling.
-      \end{itemize}
+      \parbox[t][2.2cm][t]{\linewidth}{
+        \begin{itemize}\scriptsize
+          \item \textbf{Full Reproduction}: Exact match on Stage 2 (84.29\%) and high fidelity on Stage 3 (67.75\%).
+          \item \textbf{Novelty}: Attention + Mish + Focal Loss delivered \textbf{+0.47\% accuracy boost}.
+          \item \textbf{Future Work}: Dynamic Graph Attention (GATv2) for whole-slide villous modeling.
+        \end{itemize}
+      }
     \end{block}
+    \vspace{0.15cm}
     \begin{block}{Key References}
-      \tiny
-      1. Vanea et al., \textit{Nat Commun}, 15:1968, 2024.\par
-      2. Lin et al., Focal Loss for Dense Detection, \textit{ICCV}, 2017.\par
-      3. Hu et al., Squeeze-and-Excitation Networks, \textit{CVPR}, 2018.\par
-      4. Misra, D., Mish Activation, \textit{BMVC}, 2020.
+      \parbox[t][1.9cm][t]{\linewidth}{
+        \tiny
+        1. Vanea et al., \textit{Nat Commun}, 15:1968, 2024.\par
+        2. Lin et al., Focal Loss for Dense Detection, \textit{ICCV}, 2017.\par
+        3. Hu et al., Squeeze-and-Excitation Networks, \textit{CVPR}, 2018.\par
+        4. Misra, D., Mish Activation, \textit{BMVC}, 2020.
+      }
     \end{block}
   \end{column}
-  \begin{column}{0.5\textwidth}
+  \hfill
+  \begin{column}{0.47\textwidth}
     \begin{exampleblock}{Group Member Contributions}
-      \begin{itemize}\scriptsize
-        \item \textbf{Varshitha Thilak Kumar (CB.SC.U4AIE23258)}: Environment config, CUDA/PyTorch porting, Stage 1 (RetinaNet) \& Stage 2 (ResNet) replication, Channel Attention design and benchmark testing.
-        \item \textbf{Siri Sanjana S (CB.SC.U4AIE23249)}: Spatial graph pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit coordinate bit-packing fix, Stage 3 ClusterGCN evaluation, report preparation.
-        \item \textbf{Shreya Arun (CB.SC.U4AIE23253)}: Multi-Class Focal Loss implementation, Mish activation integration, ablation experiments, qualitative visualization, and presentation design.
-      \end{itemize}
+      \parbox[t][3.4cm][t]{\linewidth}{
+        \begin{itemize}\tiny
+          \item \textbf{Varshitha Thilak Kumar (CB.SC.U4AIE23258)}: Environment config, CUDA/PyTorch porting, Stage 1 (RetinaNet) \& Stage 2 (ResNet) replication, Channel Attention design and benchmark testing.
+          \item \textbf{Siri Sanjana S (CB.SC.U4AIE23249)}: Spatial graph pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit coordinate bit-packing fix, Stage 3 ClusterGCN evaluation, report preparation.
+          \item \textbf{Shreya Arun (CB.SC.U4AIE23253)}: Multi-Class Focal Loss implementation, Mish activation integration, ablation experiments, qualitative visualization, and presentation design.
+        \end{itemize}
+      }
     \end{exampleblock}
+    \vspace{0.15cm}
     \begin{center}
-      \textbf{\textcolor{AmritaBlue}{Thank You!}} \\
-      \textit{Questions and Discussion}
+      \textbf{\textcolor{AmritaBlue}{\large Thank You!}} \\
+      \vspace{0.05cm}
+      \textit{\small Questions and Discussion}
     \end{center}
   \end{column}
 \end{columns}
