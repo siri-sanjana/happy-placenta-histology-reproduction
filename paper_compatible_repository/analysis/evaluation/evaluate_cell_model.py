@@ -60,7 +60,7 @@ def main(
         project_dir / annot_dir,
         hp,
         (224, 224),
-        0 if platform.system() == "Darwin" else 3,
+        0 if platform.system() in ("Darwin", "Windows") else 3,
         multiple_val_sets,
         hp.batch,
         use_test_set,

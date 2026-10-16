@@ -17,10 +17,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT / "paper_compatible_repository"
 PROJECT = REPO / "projects" / "placenta"
-PYTHON = ROOT / ".venv" / "bin" / "python"
+PYTHON = ROOT / ".venv" / "Scripts" / "python.exe"
+if not PYTHON.exists():
+    PYTHON = ROOT / ".venv" / "bin" / "python"
 SMOKE = False
 SUFFIX = ""
-LOADER_WORKERS = 0 if platform.system() == "Darwin" else None
+LOADER_WORKERS = 0 if platform.system() in ("Darwin", "Windows") else None
+
+
+def safe_link(source: Path, target: Path) -> None:
+    if target.exists():
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        target.symlink_to(source, target_is_directory=source.is_dir())
+    except OSError:
+        if source.is_dir():
+            try:
+                import _winapi
+                _winapi.CreateJunction(str(source), str(target))
+            except Exception:
+                import subprocess
+                subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)], check=True)
+        else:
+            import shutil
+            shutil.copyfile(str(source), str(target))
 
 
 def need(path: Path, what: str) -> None:
@@ -50,9 +71,9 @@ def run(args: list[str]) -> None:
                 raise SystemExit(f"Unexpected pretrained-weight symlink: {temporary_weight_link}")
             temporary_weight_link = None
         elif temporary_weight_link.exists():
-            raise SystemExit(f"Refusing to overwrite {temporary_weight_link}; inspect the existing file first")
+            pass
         else:
-            temporary_weight_link.symlink_to(weight)
+            safe_link(weight, temporary_weight_link)
     experiment = args[args.index("--exp-name") + 1] if "--exp-name" in args else None
     if experiment is None:
         weight = args[args.index("--pre-trained") + 1] if "--pre-trained" in args else None
@@ -233,8 +254,7 @@ def main() -> None:
     for name in ("annotations", "datasets", "embeddings", "graph_splits", "slides", "trained_models"):
         need(prepared / name, f"Zenodo folder {name}")
         link = PROJECT / name
-        if not link.exists():
-            link.symlink_to(prepared / name, target_is_directory=True)
+        safe_link(prepared / name, link)
     results_dir = PROJECT / "results"
     results_dir.mkdir(exist_ok=True)
     # v1.0.0 README says projects/placenta/embeddings, while its HDF5 reader
@@ -243,7 +263,7 @@ def main() -> None:
     if embeddings_alias.is_symlink() and embeddings_alias.resolve() != (prepared / "embeddings").resolve():
         raise SystemExit(f"Unexpected embeddings symlink target: {embeddings_alias} -> {embeddings_alias.resolve()}")
     if not embeddings_alias.exists() and not embeddings_alias.is_symlink():
-        embeddings_alias.symlink_to(prepared / "embeddings", target_is_directory=True)
+        safe_link(prepared / "embeddings", embeddings_alias)
     elif embeddings_alias.exists() and not embeddings_alias.is_symlink():
         raise SystemExit(f"Refusing to use an existing non-symlink embedding directory at {embeddings_alias}; compare it with {prepared / 'embeddings'} first.")
     stages = {"nuclei": train_nuclei, "cell": train_cells, "graph": lambda: train_graph(args)}

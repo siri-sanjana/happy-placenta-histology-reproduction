@@ -45,7 +45,7 @@ def main(
 
     multiple_val_sets = True if len(dataset_names) > 1 else False
     dataloaders = setup_data(
-        project_dir / annot_dir, hp, multiple_val_sets, 0 if platform.system() == "Darwin" else 3, 1, use_test_set
+        project_dir / annot_dir, hp, multiple_val_sets, 0 if platform.system() in ("Darwin", "Windows") else 3, 1, use_test_set
     )
     if not use_test_set:
         dataloaders.pop("train")

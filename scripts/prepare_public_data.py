@@ -69,10 +69,17 @@ def main() -> int:
         if actual_md5 != expected_md5:
             print(f"MD5 mismatch for {name}: {actual_md5}, expected {expected_md5}", file=sys.stderr)
             return 2
-        result = subprocess.run(["unzip", "-t", str(path)], capture_output=True, text=True)
-        if result.returncode:
-            print(result.stdout + result.stderr, file=sys.stderr)
-            return result.returncode
+        try:
+            result = subprocess.run(["unzip", "-t", str(path)], capture_output=True, text=True)
+            if result.returncode:
+                print(result.stdout + result.stderr, file=sys.stderr)
+                return result.returncode
+        except FileNotFoundError:
+            with zipfile.ZipFile(path) as zf:
+                bad_file = zf.testzip()
+                if bad_file:
+                    print(f"CRC check failed for {bad_file} in {name}", file=sys.stderr)
+                    return 2
         verified.append(path)
 
     if OUT.exists():

@@ -5,10 +5,19 @@ import happy.db.eval_runs_interface as db
 
 
 def get_embeddings_file(project_dir, run_id):
-    db.init()
     embeddings_dir = project_dir / "results" / "embeddings"
-    embeddings_path = db.get_embeddings_path(run_id, embeddings_dir)
-    return embeddings_dir / embeddings_path
+    direct = list(embeddings_dir.rglob(f"run_{run_id}.hdf5"))
+    if direct:
+        return direct[0]
+    direct2 = list((project_dir / "embeddings").rglob(f"run_{run_id}.hdf5"))
+    if direct2:
+        return direct2[0]
+    try:
+        db.init()
+        embeddings_path = db.get_embeddings_path(run_id, embeddings_dir)
+        return embeddings_dir / embeddings_path
+    except Exception:
+        raise FileNotFoundError(f"Could not locate run_{run_id}.hdf5 under {embeddings_dir}")
 
 
 def get_hdf5_datasets(file_path, start, num_points, verbose=True):

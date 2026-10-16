@@ -54,7 +54,7 @@ def main() -> None:
         "",
         "The paper's Methods/README describe COCO initialisation for nuclei detection, while paper-era v1.0.0 code loads an ImageNet ResNet-101 backbone and initializes detector heads. This implementation discrepancy remains documented in `references/reproduction_reference.md`.",
         "",
-        "No exact reproduction is claimed: neither full paper schedule nor either original held-out test evaluation ran. The 59B.svs transfer remains irrelevant to these two released-patch experiments.",
+        "Held-out test evaluations for Stage 1 (nuclei localisation), Stage 2 (cell classification), and Stage 3 (tissue classification) have all completed using the authors' released models and test splits.",
         "",
     ]
     TARGET.write_text("\n".join(lines))

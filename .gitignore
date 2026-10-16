@@ -8,7 +8,7 @@ environment/pretrained/
 environment/torch_cache/
 
 # Downloaded archives, slides, extracted tiles, annotations, and model weights
-data/
+/data/
 *.pt
 *.pth
 *.h5
@@ -19,11 +19,17 @@ data/
 # Runtime outputs and generated handoff bundle are local artifacts
 paper_compatible_repository/projects/placenta/results/
 paper_compatible_repository/projects/placenta/annotations/
+paper_compatible_repository/projects/placenta/annotations
 paper_compatible_repository/projects/placenta/datasets/
+paper_compatible_repository/projects/placenta/datasets
 paper_compatible_repository/projects/placenta/embeddings/
+paper_compatible_repository/projects/placenta/embeddings
 paper_compatible_repository/projects/placenta/graph_splits/
+paper_compatible_repository/projects/placenta/graph_splits
 paper_compatible_repository/projects/placenta/slides/
+paper_compatible_repository/projects/placenta/slides
 paper_compatible_repository/projects/placenta/trained_models/
+paper_compatible_repository/projects/placenta/trained_models
 original_repository/
 colab/
 results/

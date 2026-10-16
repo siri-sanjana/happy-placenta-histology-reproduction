@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from happy.utils.vis_plotter import VisdomLinePlotter
+try:
+    from happy.utils.vis_plotter import VisdomLinePlotter
+except (ImportError, ModuleNotFoundError):
+    VisdomLinePlotter = None
 from happy.train.utils import plot_confusion_matrix
 
 

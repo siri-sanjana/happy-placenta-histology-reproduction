@@ -182,14 +182,16 @@ def make_intersection_graph(data, k, norm_edges=True, verbose=True):
 
     if verbose:
         print(f"Generating intersection of both graphs")
-    _, ncols = knn_edge_index.shape
-    dtype = ", ".join([str(knn_edge_index.dtype)] * ncols)
-    intersection = np.intersect1d(
-        knn_edge_index.view(dtype), delaunay_edge_index.view(dtype)
-    )
-    intersection = intersection.view(knn_edge_index.dtype).reshape(-1, ncols)
-    intersection = torch.tensor(intersection, dtype=torch.long).T
-    data.edge_index = intersection
+    k_norm = np.sort(knn_edge_index, axis=1)
+    d_norm = np.sort(delaunay_edge_index, axis=1)
+    k_keys = (k_norm[:, 0].astype(np.int64) << 32) | (k_norm[:, 1].astype(np.int64) & 0xFFFFFFFF)
+    d_keys = (d_norm[:, 0].astype(np.int64) << 32) | (d_norm[:, 1].astype(np.int64) & 0xFFFFFFFF)
+    inter_keys = np.intersect1d(k_keys, d_keys)
+    u = (inter_keys >> 32).astype(np.int64)
+    v = (inter_keys & 0xFFFFFFFF).astype(np.int64)
+    inter_arr = np.column_stack([u, v])
+    undir_edges = np.vstack([inter_arr, inter_arr[:, [1, 0]]])
+    data.edge_index = torch.tensor(undir_edges.T, dtype=torch.long)
 
     get_edge_distance_weights = Distance(cat=False, norm=norm_edges)
     data = get_edge_distance_weights(data)
