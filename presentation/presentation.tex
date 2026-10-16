@@ -535,39 +535,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 9: Implementation Architecture & Engineering Solutions
-% ------------------------------------------------------------------------------
-\begin{frame}{Implementation Architecture \& Engineering Solutions}
-\begin{columns}[onlytextwidth, t]
-  \begin{column}{0.47\textwidth}
-    \begin{block}{Codebase Structure \& Discrepancies Resolved}
-      \parbox[t][4.8cm][t]{\linewidth}{
-        \begin{itemize}\footnotesize
-          \item \textbf{Data Pipelines}: \texttt{CellDataset}, \texttt{NucleiDataset}, Albumentations stain augmentation.
-          \item \textbf{Evaluation Engine}: \texttt{auto\_evaluate\_reproduction.py} systematically reproduces all stages.
-          \item \textbf{Stage 1 Initialization Discrepancy}: Paper text claims COCO initialization; codebase actually initializes ResNet-101 from ImageNet, explaining the 0.826 vs 0.884 F1 delta.
-          \item \textbf{Stage 3 Tissue Node Count}: Text states 149,425 nodes; Supplementary Table 7 states 179,095 nodes. Grounded to \textbf{144,241 labeled nodes} on the official split.
-        \end{itemize}
-      }
-    \end{block}
-  \end{column}
-  \hfill
-  \begin{column}{0.47\textwidth}
-    \begin{alertblock}{Critical Engineering Solutions}
-      \parbox[t][4.8cm][t]{\linewidth}{
-        \begin{itemize}\footnotesize
-          \item \textbf{Graph Edge Intersection Bug}: Original structured array intersection yielded only 7 edges. We engineered \textbf{64-bit bit-packed indexing} \texttt{((u<<32)|v)}, correctly recovering all \textbf{5,088,272 edges}.
-          \item \textbf{Windows Multiprocessing}: Fixed DataLoader bootstrapping deadlocks by dynamically assigning OS-safe worker pools.
-          \item \textbf{Direct HDF5 Disk Reader}: Bypassed empty SQLite metadata to directly stream embeddings into ClusterLoader.
-        \end{itemize}
-      }
-    \end{alertblock}
-  \end{column}
-\end{columns}
-\end{frame}
-
-% ------------------------------------------------------------------------------
-% Slide 10: Training Settings, Hardware & Honest Reproduction Scope
+% Slide 9: Training Settings, Hardware & Honest Reproduction Scope
 % ------------------------------------------------------------------------------
 \begin{frame}{Training Settings, Hardware \& Honest Reproduction Scope}
 \begin{columns}[onlytextwidth, t]
@@ -603,7 +571,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 11: Novelty and What We Did Apart from Replicating the Paper
+% Slide 10: Novelty and What We Did Apart from Replicating the Paper
 % ------------------------------------------------------------------------------
 \begin{frame}{Novelty: What We Did Apart from Replicating the Paper}
 \begin{columns}[onlytextwidth, t]
@@ -639,7 +607,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 12: Modified Architecture Diagram
+% Slide 11: Modified Architecture Diagram
 % ------------------------------------------------------------------------------
 \begin{frame}{Modified Architecture Diagram: Feature Recalibration Flow}
 \begin{center}
@@ -678,7 +646,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 13: Baseline vs. Modified Model Comparison
+% Slide 12: Baseline vs. Modified Model Comparison
 % ------------------------------------------------------------------------------
 \begin{frame}{Comparison Table: Baseline vs. Modified Architecture}
 \begin{table}[h]
@@ -715,7 +683,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 14: Component-by-Component Ablation Study & Visual Improvements
+% Slide 13: Component-by-Component Ablation Study & Visual Improvements
 % ------------------------------------------------------------------------------
 \begin{frame}{Ablation Study: Visual Improvements \& Component Contributions}
 \begin{center}
@@ -753,7 +721,7 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 15: Clinical Imbalance Insights, Conclusion & Contributions
+% Slide 14: Clinical Imbalance Insights, Conclusion & Contributions
 % ------------------------------------------------------------------------------
 \begin{frame}{Clinical Insights, Conclusion and Contributions}
 \begin{columns}[onlytextwidth, t]
