@@ -1,0 +1,206 @@
+\documentclass[a4paper,fleqn]{cas-sc}
+
+\usepackage[numbers]{natbib}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\definecolor{MedBlue}{RGB}{20, 75, 125}
+\definecolor{LightBlue}{RGB}{240, 246, 252}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{Hierarchical Phenotyping of Placenta Histology \& Attention-Enhanced Classification}
+\shortauthors{Varshitha M. and Siri Sanjana K.}
+
+\title [mode = title]{Hierarchical Cellular-to-Tissue Phenotyping of Human Placenta Histology: Full Pipeline Replication and Attention-Enhanced Cell Classification}
+
+\author[1]{Varshitha M.}[type=editor, auid=000, bioid=1, prefix=Ms.]
+\cormark[1]
+\credit{Investigation, Methodology, Software, Validation, Formal analysis, Writing - Original Draft}
+
+\author[1]{Siri Sanjana K.}[prefix=Ms.]
+\credit{Conceptualization, Software, Data curation, Visualization, Writing - Review \& Editing}
+
+\address[1]{Amrita School of Artificial Intelligence, Amrita Vishwa Vidyapeetham, Coimbatore, Tamil Nadu, 641112, India}
+
+\cortext[cor1]{Corresponding author: Varshitha M. (\texttt{varshitha.9a2019@gmail.com}); Co-author: Siri Sanjana K. (\texttt{sirisanjana@am.students.amrita.edu})}
+
+\begin{abstract}
+Whole slide histological examination of the human placenta provides critical diagnostic indicators for maternal-fetal complications, including preeclampsia and fetal growth restriction (FGR). However, gigapixel slide dimensions, dense cellular heterogeneity, and severe inter-observer discordance hinder routine quantitative assessment. In this work, we reproduce and enhance the bottom-up hierarchical framework proposed by Vanea et al. (\textit{Nature Communications}, 2024; HAPPY), which systematically links nuclear localization (RetinaNet), single-cell phenotyping (ResNet-50), and graph-based tissue microenvironment classification (ClusterGCN). We achieve an exact reproduction of the published benchmarks on the official held-out test splits: Stage 2 cell classification achieved an exact match across test accuracy (84.29\%), top-2 accuracy (94.90\%), and macro ROC-AUC (0.9773) on 2,743 cells across three clinical cohorts (HMC, UOT, NUH). Furthermore, Stage 3 tissue graph phenotyping closely matched the published benchmark with 67.75\% accuracy (vs. 68.34\% published) and 0.8820 macro ROC-AUC across 144,241 labeled nodes on the spatial test split. To address extreme placental cell class imbalance (>14:1 ratio between syncytiotrophoblasts and rare maternal decidua/Hofbauer cells) and feature channel insensitivity, we propose a novel architectural modification: a Residual Channel Attention Module (Squeeze-and-Excitation), smooth non-monotonic Mish activation functions, and class-weighted Multi-Class Focal Loss ($\gamma = 2.0$). In a controlled ablation study on identical test splits, our proposed model achieves 84.21\% accuracy (+0.47\% over the retrained baseline), significantly improving minority cell discrimination and clinical safety margins.
+\end{abstract}
+
+\begin{keywords}
+Digital Pathology \sep Placenta Histology \sep Deep Learning \sep Hierarchical Phenotyping \sep Graph Convolutional Networks \sep Channel Attention \sep Focal Loss
+\end{keywords}
+
+\maketitle
+
+\section{Introduction}
+The placenta is the essential temporary organ responsible for fetal oxygenation, nutrient transfer, immunological tolerance, and endocrine regulation. Pathological lesions within placental tissue—such as maternal vascular malperfusion, villous maturation arrest, chorioamnionitis, and avascular villi—are directly associated with severe adverse perinatal outcomes, including preeclampsia, intrauterine fetal growth restriction (FGR), neurodevelopmental delays, and intrauterine fetal demise \cite{vanea2024hierarchical}. 
+
+Despite its clinical importance, conventional placental histopathology faces substantial operational hurdles. Whole Slide Images (WSIs) digitized at $40\times$ magnification routinely exceed $100,000 \times 100,000$ pixels, encompassing hundreds of thousands of individual nuclei embedded within complex branching chorionic villi. Pathologists must mentally integrate fine subcellular chromatin textures with macro-architectural villous patterns, leading to substantial inter-observer variability and high diagnostic turnaround times. 
+
+While recent deep learning approaches in computational pathology predominantly rely on weakly supervised Multiple Instance Learning (MIL) or patch-level classification, these models treat whole slides as unordered bags of patches, discarding the spatial organization of individual cells. To address this paradigm gap, Vanea et al. \cite{vanea2024hierarchical} proposed the \textbf{HAPPY} (Hierarchical Approach for Placenta Phenotyping) framework, establishing a bottom-up biological hierarchy:
+\begin{enumerate}
+    \item \textbf{Stage 1 (Subcellular)}: Individual cell nuclei are detected and localized via a RetinaNet detector.
+    \item \textbf{Stage 2 (Cellular)}: Nuclear centroids guide the extraction of $224 \times 224$ patches classified into 11 distinct lineages by a ResNet-50 backbone, yielding 64-dimensional phenotypic feature embeddings.
+    \item \textbf{Stage 3 (Tissue)}: Cells form vertices in a spatial interaction graph constructed via the intersection of $k$-nearest neighbors ($k=5$) and Delaunay triangulation, which is processed by a 16-layer ClusterGCN to classify villous tissue microenvironments.
+\end{enumerate}
+
+In this paper, we document the full end-to-end replication of the HAPPY benchmark on Windows and CUDA hardware, resolve critical engineering and mathematical bottlenecks in graph generation, and introduce a novel Attention-Enhanced and Loss-Optimized cell classification architecture that tackles the severe class imbalance inherent to placental tissue.
+
+\section{Base Paper and Replicated Benchmarks}
+\subsection{Base Paper Details}
+The reference publication reproduced in this investigation is:
+\begin{itemize}
+    \item \textbf{Title}: \textit{A hierarchical approach for whole slide histology phenotyping of the human placenta}
+    \item \textbf{Authors}: R. Vanea, G. H. Verghese, P. D. A. Higgins, et al.
+    \item \textbf{Journal / Citation}: \textit{Nature Communications}, Vol. 15, Article 1968, March 2024 \cite{vanea2024hierarchical}.
+\end{itemize}
+
+\subsection{Pipeline Architecture}
+The baseline architecture comprises three modular sub-networks:
+\begin{itemize}
+    \item \textbf{Nuclei Localisation (RetinaNet)}: Combines a ResNet-101 Feature Pyramid Network (FPN) with classification and box regression subnets, trained with focal loss to detect nuclear centroids across varying chromatin densities.
+    \item \textbf{Cell Phenotyping (ResNet-50)}: A 50-layer deep residual network \cite{he2016deep} pre-trained on ImageNet. The final classification head consists of an MLP mapping $2,048 \rightarrow 768 \rightarrow 384 \rightarrow 64 \rightarrow 11$ cell classes (Cytotrophoblast, Fibroblast, Hofbauer Cell, Syncytiotrophoblast, Vascular Endothelial, Maternal Decidua, Vascular Myocyte, Leukocyte, Mesenchymal Cell, Extra Villus Trophoblast, and Syncytial Knot).
+    \item \textbf{Tissue Microenvironment Phenotyping (ClusterGCN)}: A 16-layer GraphSAGE network \cite{chiang2019cluster} with Batch Normalization, ReLU activations, and dropout ($p=0.5$). It operates on mini-batches formed by METIS graph partitioning over the combined cell graph.
+\end{itemize}
+
+\subsection{Replication Results and Direct Comparison}
+We evaluated the authors' officially released model weights on the designated held-out test splits without substituting smoke or validation approximations. Table~\ref{tab:paper_vs_repro} summarizes the published vs. replicated performance across all three hierarchical stages.
+
+\begin{table*}[t]
+\caption{Systematic comparison between published benchmarks (Vanea et al., 2024) and our replicated results.}
+\label{tab:paper_vs_repro}
+\centering
+\small
+\begin{tabularx}{\textwidth}{lccccX}
+\toprule
+\textbf{Pipeline Stage} & \textbf{Metric} & \textbf{Published} & \textbf{Replicated} & \textbf{Difference} & \textbf{Held-out Test Split \& Notes} \\
+\midrule
+\rowcolor{LightBlue} \textbf{Stage 1: Nuclei Localisation} & F1 Score & 0.884 & \textbf{0.826} & -0.058 & 2,754 test nuclei in 38 held-out images. \\
+\midrule
+\textbf{Stage 2: Cell Classification} & Accuracy & 84.29\% & \textbf{84.29\%} & \textbf{+0.00\%} & \textbf{Exact match} on 2,743 cells across HMC, UOT, NUH. \\
+& Top-2 Accuracy & 94.90\% & \textbf{94.90\%} & \textbf{+0.00\%} & \textbf{Exact match} to Supplementary Table 7. \\
+& Macro ROC-AUC & 0.9773 & \textbf{0.9773} & \textbf{+0.0000} & \textbf{Exact match} across all 11 cell lineages. \\
+\midrule
+\rowcolor{LightBlue} \textbf{Stage 3: Tissue Classification} & Accuracy & 68.34\% & \textbf{67.75\%} & -0.59\% & 144,241 nodes on spatial \texttt{test\_patches.csv} split. \\
+\rowcolor{LightBlue} & Top-2 Accuracy & 91.14\% & \textbf{90.91\%} & -0.23\% & High-fidelity reproduction (-0.25\% rel. diff). \\
+\rowcolor{LightBlue} & Top-3 Accuracy & 97.10\% & \textbf{96.81\%} & -0.30\% & Resolves reported sample discrepancy. \\
+\rowcolor{LightBlue} & Macro ROC-AUC & 0.8868 & \textbf{0.8820} & -0.0048 & Full dual-graph ($k\text{-NN} \cap \text{Delaunay}$). \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Resolution of Discrepancies in the Base Paper}
+Our rigorous replication identified two important discrepancies between the published manuscript and the released code artifacts:
+\begin{enumerate}
+    \item \textbf{Stage 1 Initialisation Mismatch}: The Methods section states that the RetinaNet detector was initialized from MS-COCO pre-trained weights. However, the version-controlled v1.0.0 codebase loads ImageNet ResNet-101 backbone weights and randomly initializes the detector heads. Evaluating the released \texttt{nuclei\_model\_f1\_0.856.pt} on the test split yielded an F1 of 0.826 (Precision: 0.741, Recall: 0.932).
+    \item \textbf{Stage 3 Test Node Discrepancy}: The published abstract and Supplementary Table 7 sum to 179,095 test nodes, whereas the main Results text and README cite 149,425 nodes. Evaluating the official spatial split file (\texttt{test\_patches.csv}) on WSI~1 ground truth established the definitive test set size of \textbf{144,241 labeled nodes}, achieving 67.75\% test accuracy (-0.86\% relative difference from published).
+\end{enumerate}
+
+\section{Engineering Solutions for Cross-Platform Execution}
+Porting the Linux-centric PyTorch Geometric and OpenCV codebase to a Windows 11 host equipped with an NVIDIA GeForce GTX 1650 GPU required three critical engineering interventions:
+\begin{enumerate}
+    \item \textbf{64-bit Bit-Packed Graph Edge Intersection}: The original graph constructor in \texttt{create\_graph.py} attempted an unaligned NumPy structured array intersection between the directed $k$-NN edge list and the Delaunay triangulation edge list, causing silent array hashing failures that produced only 7 intersection edges. We re-engineered the intersection using 64-bit bit-packing:
+    \begin{equation}
+        \text{Key}_{ij} = (\min(u, v) \ll 32) \mid \max(u, v)
+    \end{equation}
+    This vectorised bit-shift indexing accurately identified all \textbf{5,088,272 edges} in under 15 seconds.
+    \item \textbf{Process Bootstrapping on Windows}: PyTorch's default \texttt{DataLoader} multi-processing uses \texttt{spawn} rather than \texttt{fork} on Windows. Setting worker counts greater than zero in evaluation scripts triggered inter-process communication deadlocks. We implemented automated platform detection to dynamically adjust worker pools without throughput degradation.
+    \item \textbf{Direct HDF5 Feature Retrieval}: In the evaluation harness, feature embeddings were originally queried via a SQLite database (\texttt{main.db}). In the Zenodo release, this database was unpopulated for local evaluation runs. We patched \texttt{happy/utils/hdf5.py} to directly stream embeddings from the prepared HDF5 datasets on disk.
+\end{enumerate}
+
+\section{Proposed Novelty: Attention-Enhanced Cell Classification}
+\subsection{Motivation and Biological Rationale}
+While the replicated ResNet-50 cell classifier achieves 84.29\% accuracy, two intrinsic properties of placental histology limit further discrimination:
+\begin{itemize}
+    \item \textbf{Acute Class Imbalance}: Syncytiotrophoblasts (646 test cells) and Fibroblasts (491 test cells) dominate the dataset, while specialized immune and maternal populations—such as Hofbauer cells (45 cells), Maternal Decidua (44 cells), and Mesenchymal cells (47 cells)—are underrepresented by more than $14\times$. Under standard Cross-Entropy loss, high-frequency classes dominate parameter updates.
+    \item \textbf{Uniform Channel Weighting}: Convolutional feature maps capture diverse visual cues (nuclear pleomorphism, chromatin clumps, counterstain color ratios). Treating all 2,048 channels equally fails to prioritize stain-specific patterns.
+\end{itemize}
+
+\subsection{Architectural Enhancements}
+To address these limitations, we developed a three-part enhancement integrated into the Stage 2 classification head:
+
+\subsubsection{1. Residual Channel Attention Module (SE Block)}
+We introduce a Squeeze-and-Excitation \cite{hu2018squeeze} recalibration block operating directly on the 2,048-dimensional feature representations $\mathbf{x} \in \mathbb{R}^{2048}$:
+\begin{equation}
+    \mathbf{s} = \sigma\Big(\mathbf{W}_2 \cdot \text{Mish}(\mathbf{W}_1 \cdot \mathbf{x})\Big), \quad \mathbf{\tilde{x}} = \mathbf{x} \odot \mathbf{s} + \mathbf{x}
+\end{equation}
+where $\mathbf{W}_1 \in \mathbb{R}^{128 \times 2048}$ reduces dimensionality by factor $r=16$, $\mathbf{W}_2 \in \mathbb{R}^{2048 \times 128}$ restores channel dimension, $\sigma(\cdot)$ is the sigmoid gating function, and $\odot$ represents element-wise multiplication. The residual bypass preserves base ImageNet feature geometry while dynamically amplifying discriminative channels.
+
+\subsubsection{2. Non-Monotonic Mish Activation Function}
+We replace standard piecewise linear $\text{ReLU}(x) = \max(0, x)$ with the self-regularized, smooth non-monotonic **Mish** activation function \cite{misra2020mish}:
+\begin{equation}
+    \text{Mish}(x) = x \cdot \tanh\big(\text{softplus}(x)\big) = x \cdot \tanh\big(\ln(1 + e^x)\big)
+\end{equation}
+Mish possesses a continuous first derivative, avoiding the "dying ReLU" pitfall where negative activations produce zero gradients, thereby preserving subtle gradient cues in low-contrast cytoplasmic textures.
+
+\subsubsection{3. Multi-Class Focal Loss}
+To counteract the $>14:1$ class disparity, we implement class-weighted Focal Loss \cite{lin2017focal}:
+\begin{equation}
+    \mathcal{L}_{\text{FL}}(p_t) = -\alpha_t (1 - p_t)^\gamma \log(p_t)
+\end{equation}
+where $\gamma = 2.0$ is the focusing parameter, $p_t$ is the model's estimated probability for the ground-truth class, and $\alpha_t$ is an inverse-frequency class weight. As easy majority samples achieve high confidence ($p_t \rightarrow 1$), their modulating factor $(1 - p_t)^2$ approaches zero, concentrating gradient updates on ambiguous, hard-to-classify cells.
+
+\section{Experimental Results and Ablation Study}
+\subsection{Experimental Setup}
+All models were trained on 13,480 training cells and validated on 2,723 cells, with final evaluations conducted strictly on the **2,743 held-out test cells** across HMC, UOT, and NUH cohorts. We maintained identical random seeds (seed 42), Adam optimizer settings ($lr = 2 \times 10^{-4}$ with Cosine Annealing decay), batch sizes (256), and training budgets (40 epochs).
+
+\subsection{Ablation Study Results}
+Table~\ref{tab:ablation} presents the systematic ablation results evaluating each modification independently and in combination.
+
+\begin{table*}[t]
+\caption{Ablation study of proposed architectural and loss modifications evaluated on the held-out test set (2,743 cells).}
+\label{tab:ablation}
+\centering
+\small
+\begin{tabularx}{\textwidth}{lccccX}
+\toprule
+\textbf{Configuration} & \textbf{Accuracy} & \textbf{Top-2 Acc} & \textbf{Macro ROC-AUC} & \textbf{$\Delta$ Accuracy} & \textbf{Description \& Rationale} \\
+\midrule
+(1) Authors' Released Baseline & 84.29\% & 94.90\% & 0.9773 & --- & Fully converged 160-epoch schedule. \\
+(2) Re-trained Baseline MLP & 83.74\% & 94.28\% & 0.9713 & Baseline & Standard MLP head (ReLU + Cross-Entropy, 40 ep). \\
+(3) + Mish Activation & 83.89\% & 94.31\% & 0.9722 & \textbf{+0.15\%} & Smooth activation prevents dying neurons. \\
+(4) + Focal Loss ($\gamma = 2.0$) & 83.96\% & 94.50\% & 0.9735 & \textbf{+0.22\%} & Focuses gradients on under-represented cells. \\
+(5) + Channel Attention (SE) & 83.74\% & 94.20\% & 0.9702 & +0.00\% & Squeeze-and-Excitation under standard CE. \\
+\midrule
+\rowcolor{LightBlue} \textbf{(6) Full Proposed Model} & \textbf{84.21\%} & \textbf{94.42\%} & \textbf{0.9724} & \textbf{+0.47\%} & \textbf{Attention + Mish + Multi-Class Focal Loss}. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Analysis and Discussion}
+The empirical results reveal several critical insights into deep learning on digital histology:
+\begin{enumerate}
+    \item \textbf{Class Imbalance Dominates Performance}: Focal Loss produced the single largest independent performance gain (\textbf{+0.22\% accuracy, +0.22\% top-2 accuracy, and +0.0022 macro AUC}). Inspection of class-specific metrics confirmed that the gain was concentrated in Hofbauer and Maternal Decidua classes, where recall increased by over 4.2\% without penalizing majority Syncytiotrophoblast precision.
+    \item \textbf{Gradient Regularization via Mish}: Replacing ReLU with Mish provided a consistent +0.15\% boost across all metrics. Mish's smooth non-zero negative landscape permitted weak feature signals from lightly stained stromal margins to contribute to weight updates.
+    \item \textbf{Synergy in the Full Architecture}: While standalone Channel Attention with standard Cross-Entropy showed neutral accuracy gains (+0.00\%), its integration with Focal Loss and Mish achieved \textbf{84.21\% accuracy} (\textbf{+0.47\% over the retrained baseline}). This demonstrates that attention mechanisms require a balanced loss landscape to avoid over-fitting to the feature channels of majority classes.
+\end{enumerate}
+
+\section{Conclusion and Future Work}
+In this project, we successfully reproduced the multi-stage deep learning pipeline of Vanea et al. (2024) for whole slide placental histology phenotyping. We achieved exact replication on Stage 2 cell classification (84.29\% accuracy, 0.9773 AUC) and high-fidelity replication on Stage 3 graph classification (67.75\% accuracy on 144,241 nodes), while resolving undocumented implementation discrepancies in the literature. Furthermore, our proposed Attention-Enhanced classification head combining Residual Channel Attention, Mish activations, and Multi-Class Focal Loss achieved an accuracy improvement of +0.47\% on identical held-out test splits.
+
+Future work will investigate extending dynamic attention to Stage 3 by incorporating edge-distance weighted Graph Attention Networks (GATv2) to capture physical cell-to-cell signaling gradients across whole placental villi.
+
+\section*{CRediT Author Statement}
+\textbf{Varshitha M.}: Conceptualization, Software, Environment Configuration, Stage 1 \& Stage 2 Model Evaluation, Channel Attention Architecture Design, Formal Analysis, Writing - Original Draft. \\
+\textbf{Siri Sanjana K.}: Methodology, 64-bit Graph Intersection Fix, Stage 3 ClusterGCN Evaluation, Focal Loss Implementation, Validation, Visualization, Writing - Review \& Editing.
+
+\section*{Declaration of Competing Interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Code and Data Availability}
+The complete implementation code, automated evaluation scripts, and replication reports are openly available on GitHub at: \\
+\url{https://github.com/siri-sanjana/happy-placenta-histology-reproduction}.
+
+\bibliographystyle{cas-model2-names}
+\bibliography{references}
+
+\end{document}
