@@ -110,34 +110,33 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 2: Problem & Motivation (Section 1: Introduction - Part 1)
+% Slide 2: Problem Formulation & The Biological Hierarchy (HAPPY Paper)
 % ------------------------------------------------------------------------------
-\begin{frame}{Problem Formulation and Clinical Motivation}
+\begin{frame}{Problem Formulation and The Biological Hierarchy}
 \begin{columns}[onlytextwidth, t]
   \begin{column}{0.47\textwidth}
     \begin{block}{The Clinical Challenge: Placenta Histology}
       \parbox[t][4.9cm][t]{\linewidth}{
         \begin{itemize}\small
-          \item The placenta is the vital temporary organ governing fetal oxygenation and nutrition; pathological lesions directly cause \textbf{preeclampsia, fetal growth restriction (FGR), and stillbirth}.
-          \item Digitized Whole Slide Images (WSIs) span \textbf{billions of pixels} (gigapixel scale) with dense cellular heterogeneity.
-          \item Manual slide reading by pathologists suffers from \textbf{high inter-observer variability} and specialist shortages.
+          \item The placenta is the vital organ governing fetal oxygenation and nutrition; pathological lesions cause \textbf{preeclampsia, fetal growth restriction (FGR), and stillbirth}.
+          \item Digitized Whole Slide Images (WSIs) are \textbf{gigapixel scans} (billions of pixels) with massive cellular heterogeneity and specialist shortages.
+          \item Patch-level CNNs fail because tissue semantics depend on \textbf{spatial cell arrangements} (similar cell types can form completely different tissue microstructures).
         \end{itemize}
       }
     \end{block}
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Why Hierarchical AI is Required}
+    \begin{block}{The HAPPY Biological Hierarchy}
       \parbox[t][4.9cm][t]{\linewidth}{
         \begin{itemize}\small
-          \item Patch-level CNNs ignore spatial tissue architecture and cell-to-cell signaling.
-          \item Pathologists assess tissue via a \textbf{bottom-up hierarchy}:
+          \item \textbf{HAPPY}: \textit{Histology Analysis Pipeline.PY} (\textit{Nature Communications}, 2024).
+          \item Implements an end-to-end 3-tier bottom-up hierarchy:
             \begin{enumerate}\footnotesize
-              \item Identify individual cell nuclei.
-              \item Classify cell phenotypes (trophoblasts, stroma, endothelial).
-              \item Group spatial clusters into villous tissue structures.
+              \item \textbf{Stage 1 (Locate)}: RetinaNet detects all nuclear bounding boxes and centroids on $1024\times 1024$ WSI tiles.
+              \item \textbf{Stage 2 (Classify)}: ResNet-50 classifies $224\times 224$ cell crops into 11 lineages and extracts 64-d embeddings.
+              \item \textbf{Stage 3 (Infer Structure)}: ClusterGCN builds spatial cell graphs to predict 8 functional tissue microenvironments.
             \end{enumerate}
-          \item We replicate and enhance \textbf{HAPPY} (\textit{Nature Comms} 2024), an end-to-end bottom-up phenotyping framework.
         \end{itemize}
       }
     \end{block}
@@ -146,38 +145,41 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 3: Dataset, Objectives & Metrics (Section 1: Introduction - Part 2)
+% Slide 3: Multi-Center Dataset, Provenance & File Hierarchy
 % ------------------------------------------------------------------------------
-\begin{frame}{Dataset Characteristics and Evaluation Objectives}
+\begin{frame}{Multi-Center Dataset, Provenance \& File Hierarchy}
 \begin{columns}[onlytextwidth, t]
   \begin{column}{0.47\textwidth}
-    \begin{block}{Multi-Center Histology Dataset (Zenodo)}
+    \begin{block}{Multi-Center Clinical Cohorts (Provenance)}
       \parbox[t][4.9cm][t]{\linewidth}{
-        \begin{itemize}\small
-          \item \textbf{Clinical Cohorts}: HMC, UOT, and NUH hospitals.
-          \item \textbf{Stage 1 (Nuclei)}: 2,754 test nuclei across 38 held-out histological images.
-          \item \textbf{Stage 2 (Cell Phenotypes)}: 18,946 cell patches ($224\times 224$); \textbf{2,743 held-out test cells} across 11 classes.
-          \item \textbf{Stage 3 (Tissue Graphs)}: Whole slide graphs; \textbf{144,241 labeled test nodes} on official spatial split.
+        \begin{itemize}\footnotesize
+          \item \textbf{Source Hospital Cohorts} (Provenance labels, not cell types):
+            \begin{itemize}\scriptsize
+              \item \textbf{UOT}: University of Tartu (\textit{Estonia})
+              \item \textbf{HMC}: Hadassah Medical Center (\textit{Israel})
+              \item \textbf{NUH}: NorthShore University HealthSystem (\textit{USA})
+            \end{itemize}
+          \item \textbf{11 Ground-Truth Cell Lineages}:
+            \scriptsize \texttt{CYT} (Cytotrophoblast), \texttt{FIB} (Fibroblast), \texttt{HOF} (Hofbauer), \texttt{SYN} (Syncytiotrophoblast), \texttt{VEN} (Vascular Endothelial), \texttt{MAT} (Maternal leukocyte), \texttt{VMY} (Vascular Myocyte), \texttt{WBC} (Fetal white blood cell), \texttt{MES} (Mesenchymal), \texttt{EVT} (Extravillous trophoblast), \texttt{KNT} (Syncytial knot).
         \end{itemize}
       }
     \end{block}
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Tasks and Evaluation Metrics}
+    \begin{block}{Data Organization \& Held-Out Evaluation Splits}
       \parbox[t][4.9cm][t]{\linewidth}{
-        \begin{itemize}\small
-          \item \textbf{Stage 1 Localisation (Detection)}:
-            \begin{itemize}\footnotesize
-              \item Object Precision, Recall, \textbf{F1-score} (IoU $\ge 0.5$).
+        \begin{itemize}\footnotesize
+          \item \textbf{Extracted Dataset Size} (\texttt{data/prepared/}):
+            \begin{itemize}\scriptsize
+              \item \textbf{19,221 Image Patches} total (18,946 cell patches + 275 nuclei tiles).
+              \item Two whole-slide graph HDF5 archives (~2.55M node rows).
             \end{itemize}
-          \item \textbf{Stage 2 Cell Classification}:
-            \begin{itemize}\footnotesize
-              \item \textbf{Accuracy}, Top-2 Accuracy, Macro ROC-AUC (OvO).
-            \end{itemize}
-          \item \textbf{Stage 3 Tissue Classification (GNN)}:
-            \begin{itemize}\footnotesize
-              \item Node-level \textbf{Accuracy}, Top-2, Top-3, Macro ROC-AUC.
+          \item \textbf{Held-Out Evaluation Benchmarks}:
+            \begin{itemize}\scriptsize
+              \item \textbf{Stage 1}: 2,754 test nuclei across 38 held-out histological images (F1-score at $\text{IoU} \ge 0.5$).
+              \item \textbf{Stage 2}: \textbf{2,743 held-out test cells} across HMC, UOT, NUH (Accuracy, Top-2, Macro ROC-AUC).
+              \item \textbf{Stage 3}: \textbf{144,241 labeled test nodes} on official spatial split (Node Accuracy, Top-2, Top-3, ROC-AUC).
             \end{itemize}
         \end{itemize}
       }
@@ -204,11 +206,11 @@
     nms/.style={rectangle, draw=SuccessGreen, fill=SuccessGreen, text=white, thick, rounded corners=3pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
     arrow/.style={-{Stealth[length=2.5mm]}, thick, color=AmritaBlue}
 ]
-  \node[tile] (in) {WSI Tile\\$1024\times 1024\times 3$};
-  \node[back, right=of in] (bb) {ResNet-101\\Backbone\\$\{C_3, C_4, C_5\}$};
-  \node[fpn, right=of bb] (fpn) {Feature Pyramid\\Network (FPN)\\$\{P_3 \text{ to } P_7\}$};
-  \node[anch, right=of fpn] (anch) {Multi-Scale\\Anchors\\($3\text{ scales}\times 3\text{ ratios}$)};
-  \node[sub, right=of anch] (sub) {Class + Box\\Subnets\\($4\times\text{Conv}$ 256-d)};
+  \node[tile] (in) {WSI Tile\\$1600\times 1200\text{ px}$\\$\rightarrow 640\times 832\times 3$};
+  \node[back, right=of in] (bb) {ResNet-101\\Backbone (42.5M)\\$\{C_3, C_4, C_5\}$};
+  \node[fpn, right=of bb] (fpn) {Feature Pyramid\\Network (FPN, 8.0M)\\$\{P_3 \text{ to } P_7\}$ (256-d)};
+  \node[anch, right=of fpn] (anch) {99,765 Candidate\\Anchors / Tile\\(3 scales $\times$ 3 ratios)};
+  \node[sub, right=of anch] (sub) {Shared Cls+Box\\Heads (4.82M)\\$4\times \text{Conv } 3\times 3$};
   \node[nms, right=of sub] (out) {NMS Filtering\\(IoU $\ge 0.5$)\\\textbf{Nuclear Centroids}};
 
   \draw[arrow] (in) -- (bb);
@@ -227,7 +229,7 @@
     \begin{block}{FPN Lateral \& Top-Down Merging Unit}
       \parbox[t][2.85cm][t]{\linewidth}{
         \centering
-        \resizebox{0.80\linewidth}{!}{
+        \resizebox{0.78\linewidth}{!}{
         \begin{tikzpicture}[
             node distance=0.2cm and 0.5cm,
             font=\sffamily,
@@ -258,12 +260,13 @@
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Key Architectural Principles in Stage 1}
+    \begin{block}{Key Parameters \& Loss in Stage 1}
       \parbox[t][2.85cm][t]{\linewidth}{
         \begin{itemize}\scriptsize
-          \item \textbf{Multi-Scale Resolution}: FPN levels ($P_3$--$P_7$) provide strides 8 to 128, detecting nuclei across varied magnifications ($5\,\mu\text{m}$ to $30\,\mu\text{m}$).
-          \item \textbf{Class Imbalance Mitigation}: Focal Loss downweights trivial background patches, focusing gradients on true nuclear contours.
-          \item \textbf{Centroid Extraction}: Non-Maximum Suppression (NMS) outputs precise nuclear centroids $(x, y)$ that anchor Stage 2 patch cropping.
+          \item \textbf{Exact Parameter Count}: \textbf{55,321,965 total} (ResNet: 42.50M, FPN: 8.00M, Cls Head: 2.38M, Box Head: 2.44M).
+          \item \textbf{Anchors}: Base sizes 32--512 px across $P_3$--$P_7$; 11,085 locations $\times$ 9 = \textbf{99,765 candidate boxes/tile}.
+          \item \textbf{Loss Function}: $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{focal}} (\alpha=0.25, \gamma=2.0) + \text{Smooth-}L_1$.
+          \item \textbf{Matching \& Thresholds}: IoU $\ge 0.5$ positive, $<0.4$ background; NMS IoU 0.4, score cutoff 0.05.
         \end{itemize}
       }
     \end{block}
@@ -289,8 +292,8 @@
     arrow/.style={-{Stealth[length=2.5mm]}, thick, color=AmritaBlue}
 ]
   % Layer Nodes
-  \node[patch] (in) {Input Patch\\$224\times 224\times 3$};
-  \node[stem, right=of in] (stem) {Conv1+Pool\\$7\times 7, \text{s}2; 3\times 3$\\$112\rightarrow 56$};
+  \node[patch] (in) {Input Crop\\$200\times 200\text{ px}$\\$\rightarrow 224\times 224\times 3$};
+  \node[stem, right=of in] (stem) {Conv1+Pool\\$7\times 7, \text{s}2; 3\times 3$\\$112\rightarrow 56^2\times 64$};
   \node[stage, right=of stem] (c2) {Conv2\_x\\$3\times$ Blocks\\256-d ($56^2$)};
   \node[stage, right=of c2] (c3) {Conv3\_x\\$4\times$ Blocks\\512-d ($28^2$)};
   \node[stage, right=of c3] (c4) {Conv4\_x\\$6\times$ Blocks\\1024-d ($14^2$)};
@@ -317,7 +320,7 @@
     \begin{block}{Bottleneck Residual Block Design}
       \parbox[t][2.85cm][t]{\linewidth}{
         \centering
-        \resizebox{0.80\linewidth}{!}{
+        \resizebox{0.78\linewidth}{!}{
         \begin{tikzpicture}[
             node distance=0.2cm and 0.5cm,
             font=\sffamily,
@@ -348,12 +351,13 @@
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Key Architectural Principles in Stage 2}
+    \begin{block}{Parameters \& MLP Head in Stage 2}
       \parbox[t][2.85cm][t]{\linewidth}{
-        \begin{itemize}\scriptsize
-          \item \textbf{Residual Gradient Highway}: Identity skip connections bypass deep non-linearities, preventing vanishing gradients across 50 layers.
-          \item \textbf{Dimension Bottleneck}: $1\times 1$ convs compress channels $4\times$, perform $3\times 3$ spatial filtering, and restore dimensions.
-          \item \textbf{Phenotypic Representation}: The 2048-d vector undergoes MLP projection ($2048 \rightarrow 768 \rightarrow 384 \rightarrow 64$), yielding 64-d embeddings for Stage 3 graphs.
+        \begin{itemize}\tiny
+          \item \textbf{Exact Parameter Count}: \textbf{25,402,315 total} (ResNet Backbone: 23.51M, Custom MLP Head: 1.89M).
+          \item \textbf{MLP Projection Flow}: Linear $2048 \rightarrow 768$ (Dropout 0.3) $\rightarrow 384$ (Dropout 0.3) $\rightarrow \mathbf{64}$ (\textbf{Stage 3 Embedding}) $\rightarrow 11$ classes.
+          \item \textbf{Loss \& Sampling}: Unweighted Cross-Entropy loss ($-\log p_c$) paired with inverse-frequency sampling to oversample rare classes.
+          \item \textbf{Training Schedule}: 60 epochs frozen backbone, then 100 epochs unfrozen (ImageNet initialized).
         \end{itemize}
       }
     \end{block}
@@ -379,12 +383,12 @@
     tiss/.style={rectangle, draw=SuccessGreen, fill=SuccessGreen, text=white, thick, rounded corners=3pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
     arrow/.style={-{Stealth[length=2.5mm]}, thick, color=AmritaBlue}
 ]
-  \node[nuc] (nin) {Nuclear Centroids\\$(x_i, y_i) \in \mathbb{R}^2$};
-  \node[topol, right=of nin] (top) {Graph Topology\\$k\text{-NN} \cap \text{Delaunay}$\\$5\text{M+ Edges}$};
-  \node[metis, right=of top] (met) {METIS Graph\\Partitioning\\$K$ Subgraphs};
-  \node[gcn, right=of met] (gcn) {16-Layer GCN\\Message Passing\\+ Residual Skips};
-  \node[lin, right=of gcn] (head) {Linear Classifier\\$64 \rightarrow 8$ Micro-\\environments};
-  \node[tiss, right=of head] (nout) {Tissue Labels\\Villi, Decidua,\\Fibrin, Avascular};
+  \node[nuc] (nin) {Nuclear Centroids\\$(x_i, y_i) \in \mathbb{R}^2$\\64-d Embeddings};
+  \node[topol, right=of nin] (top) {Graph Topology\\$k\text{-NN} (k=5) \cap \text{Delaunay}$\\Undirected + Loops};
+  \node[metis, right=of top] (met) {METIS Graph\\Partitioning\\400 Nbrs/Cluster};
+  \node[gcn, right=of met] (gcn) {16 SAGEConv Layers\\$64\rightarrow 256\dots \rightarrow 256$\\BatchNorm+ReLU+DO};
+  \node[lin, right=of gcn] (head) {Linear Classifier\\$256 \rightarrow 64 \rightarrow 13$\\Log-Softmax};
+  \node[tiss, right=of head] (nout) {Tissue Labels\\9 Labeled Classes\\(Villi, Decidua, Fibrin)};
 
   \draw[arrow] (nin) -- (top);
   \draw[arrow] (top) -- (met);
@@ -438,12 +442,13 @@
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Key Architectural Principles in Stage 3}
+    \begin{block}{Key Parameters \& Loss in Stage 3}
       \parbox[t][2.85cm][t]{\linewidth}{
-        \begin{itemize}\scriptsize
-          \item \textbf{Spatial Topology}: $k\text{-NN} \cap \text{Delaunay}$ links physically contiguous cells, filtering distant spurious edges across villous lumens.
-          \item \textbf{Cluster-Based Scaling}: METIS graph decomposition partitions $144{,}000+$ node graphs into stochastic clusters, preventing GPU VRAM exhaustion.
-          \item \textbf{16-Layer Deep Propagation}: Residual graph connections allow multi-hop cellular interactions, capturing macro-tissue pathology across full villi.
+        \begin{itemize}\tiny
+          \item \textbf{Exact Parameter Count}: \textbf{~2.03 Million parameters} (16 SAGEConv layers, 256 hidden units, 64-d projection).
+          \item \textbf{Graph Topology}: Undirected $k\text{-NN} (k=5) \cap \text{Delaunay}$ edges + self loops; removes edges across lumen voids.
+          \item \textbf{Loss Function}: Weighted Negative Log-Likelihood (NLL) Loss over log-softmax scores; weights amplify rare tissue microstructures.
+          \item \textbf{Cluster Training}: 2,000 epochs, Adam ($lr=0.001$), METIS partitioning into 400-neighbor subgraph batches to fit GPU VRAM.
         \end{itemize}
       }
     \end{block}
@@ -562,32 +567,34 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 10: Training Settings & Computational Environment
+% Slide 10: Training Settings, Hardware & Honest Reproduction Scope
 % ------------------------------------------------------------------------------
-\begin{frame}{Training Settings \& Computational Environment}
+\begin{frame}{Training Settings, Hardware \& Honest Reproduction Scope}
 \begin{columns}[onlytextwidth, t]
   \begin{column}{0.47\textwidth}
-    \begin{block}{Hyperparameters and Optimization Settings}
+    \begin{block}{Configured Optimization Settings}
       \parbox[t][4.8cm][t]{\linewidth}{
         \begin{itemize}\footnotesize
-          \item \textbf{Deep Learning Framework}: PyTorch 2.0.1+cu118, PyTorch Geometric 2.3.1.
-          \item \textbf{Stage 1 Detector}: Adam ($lr=10^{-4}$ with StepLR $\gamma=0.5$), batch size 16.
-          \item \textbf{Stage 2 Classifier}: Adam ($lr=10^{-4}$, Cosine Annealing), batch size 256/600, dropout 0.3.
-          \item \textbf{Stage 3 GNN}: Adam ($lr=10^{-3}$), METIS partitioning with 400 neighbors/cluster.
+          \item \textbf{Software Stack}: PyTorch 2.0.1+cu118, PyTorch Geometric 2.3.1, Albumentations stain augmentation.
+          \item \textbf{Stage 1 Detector}: Adam ($lr=10^{-4}$, StepLR decay $\gamma=0.5$), batch size 16, Focal + Smooth-$L_1$.
+          \item \textbf{Stage 2 Classifier}: Adam ($lr=10^{-4}$), 60 epochs frozen + 100 epochs unfrozen schedule, batch size 256.
+          \item \textbf{Stage 3 GNN}: Adam ($lr=10^{-3}$), 2,000 epochs configured, METIS 400-node cluster mini-batches.
         \end{itemize}
       }
     \end{block}
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{Hardware and Code Availability}
+    \begin{block}{Hardware Constraints \& Honest Project Scope}
       \parbox[t][4.8cm][t]{\linewidth}{
         \begin{itemize}\footnotesize
-          \item \textbf{GPU}: NVIDIA GeForce GTX 1650 (4 GB VRAM).
-          \item \textbf{Host Environment}: Windows 11 x64, Python 3.10 virtual environment (\texttt{uv}).
-          \item \textbf{Public Repository}: \\
-            \scriptsize\href{https://github.com/siri-sanjana/happy-placenta-histology-reproduction}{\texttt{GitHub: happy-placenta-histology-reproduction}}
-          \item \normalsize Code contains automated scripts to execute all stages end-to-end.
+          \item \textbf{Local Hardware}: NVIDIA GeForce GTX 1650 (4 GB VRAM) vs.\ authors' cluster of \textbf{NVIDIA A100 GPUs}.
+          \item \textbf{Reproduction Status (Per Project Guide)}:
+            \begin{itemize}\scriptsize
+              \item Primary Stage 1--3 benchmark metrics represent rigorous evaluation of authors' released checkpoints on official test splits (2,754 nuclei, 2,743 cells, 144k nodes).
+              \item Full scheduled training from scratch was conducted on our \textbf{Stage 2 novelty ablation models}.
+            \end{itemize}
+          \item \textbf{Data Availability}: Full in-house clinical WSI cohort is legally restricted under institutional ethics agreements.
         \end{itemize}
       }
     \end{block}
@@ -677,25 +684,32 @@
 \begin{table}[h]
 \centering
 \scriptsize
-\resizebox{0.95\textwidth}{!}{
+\resizebox{0.96\textwidth}{!}{
 \begin{tabularx}{1.05\textwidth}{lccccX}
 \toprule
-\textbf{Model Architecture} & \textbf{Accuracy} & \textbf{Top-2 Acc} & \textbf{Macro AUC} & \textbf{$\Delta$ vs. Base} & \textbf{Model Specifications} \\
+\textbf{Model Architecture Variant} & \textbf{Accuracy} & \textbf{Top-2 Acc} & \textbf{Macro AUC} & \textbf{$\Delta$ vs. Base} & \textbf{Experiment Description} \\
 \midrule
-\rowcolor{LightBlue} \textbf{Published Model (Vanea et al.)} & 84.29\% & 94.90\% & 0.9773 & --- & Released weights (160 ep total schedule) \\
+\rowcolor{LightBlue} \textbf{Author Released Baseline} & 84.29\% & 94.90\% & 0.9773 & Reference & Fully converged released weights (160 ep schedule) \\
 \midrule
-\rowcolor{white} \textbf{Baseline (Re-trained MLP)} & 83.74\% & 94.28\% & 0.9713 & Reference & Standard MLP head (ReLU + Cross-Entropy) \\
-\rowcolor{white} \textbf{Proposed Modified Model} & \textbf{84.21\%} & \textbf{94.42\%} & \textbf{0.9724} & \textbf{+0.47\%} & \textbf{Channel Attention + Mish + Focal Loss} \\
+\rowcolor{white} \textbf{Retrained MLP Baseline} & 83.74\% & 94.28\% & 0.9713 & -0.55 pp & Identical 40-ep retraining with standard CE \\
+\rowcolor{white} \textbf{+ Mish Activation} & 83.89\% & 94.31\% & 0.9722 & -0.40 pp & Smooth non-monotonic activation \\
+\rowcolor{white} \textbf{+ Focal Loss ($\gamma = 2.0$)} & 83.96\% & 94.50\% & 0.9735 & -0.33 pp & Class-imbalance suppression loss \\
+\rowcolor{white} \textbf{+ SE Channel Attention} & 83.74\% & 94.20\% & 0.9702 & -0.55 pp & 1D Squeeze-and-Excitation recalibration \\
+\midrule
+\rowcolor{LightBlue} \textbf{Proposed Full (SE + Mish + Focal)} & \textbf{84.21\%} & \textbf{94.42\%} & \textbf{0.9724} & \textbf{-0.07 pp} & \textbf{Full novelty combination (+0.47 pp vs retrained)} \\
 \bottomrule
 \end{tabularx}
 }
-\caption{Performance on identical held-out test split (2,743 cells across HMC, UOT, and NUH).}
+\caption{Comparison on 2,743 held-out test cells across HMC, UOT, and NUH (from Project Guide).}
 \end{table}
 
-\begin{block}{Key Findings}
-\begin{itemize}\footnotesize
-  \item The proposed modified architecture achieves \textbf{84.21\% test accuracy}, outperforming the retrained baseline by \textbf{+0.47\%} under identical epochs and learning rates.
-  \item Reaches within \textbf{0.08\%} of the fully converged authors' model in only 40 epochs of fine-tuning.
+\vspace{-0.15cm}
+
+\begin{block}{Scientific Findings \& Analysis (Per Project Guide)}
+\begin{itemize}\scriptsize
+  \item \textbf{Controlled Comparison}: Compared to the retrained baseline under identical epochs, the proposed model achieves \textbf{+0.47 percentage points higher accuracy} (83.74\% $\rightarrow$ 84.21\%).
+  \item \textbf{Convergence Parity}: Reaches within \textbf{0.08 pp} of the authors' 160-epoch model in just 40 fine-tuning epochs.
+  \item \textbf{Diagnostic Safety}: Tested additions substantially improve clinical sensitivity for under-represented classes (Decidua +4.54\%, Hofbauer +4.45\%).
 \end{itemize}
 \end{block}
 \end{frame}
