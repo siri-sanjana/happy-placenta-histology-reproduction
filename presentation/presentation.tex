@@ -62,15 +62,15 @@
 % Suppress duplicate top headline to maximize vertical slide area & alignment
 \setbeamertemplate{headline}{}
 
-% Professional Three-Segment Footline
+% Professional Three-Segment Footline (Anonymous / Course-Centric)
 \setbeamertemplate{footline}{%
   \leavevmode%
   \hbox{%
   \begin{beamercolorbox}[wd=.36\paperwidth,ht=2.5ex,dp=1.1ex,leftskip=0.5cm]{palette primary}%
-    \usebeamerfont{author in head/foot}\textbf{Varshitha, Siri Sanjana, Shreya}
+    \usebeamerfont{author in head/foot}\textbf{Course 22AIE437: Medical Image Processing}
   \end{beamercolorbox}%
   \begin{beamercolorbox}[wd=.36\paperwidth,ht=2.5ex,dp=1.1ex,center]{palette secondary}%
-    \usebeamerfont{title in head/foot}HAPPY Placenta Histology (22AIE437)
+    \usebeamerfont{title in head/foot}HAPPY Placenta Histology Replication
   \end{beamercolorbox}%
   \begin{beamercolorbox}[wd=.28\paperwidth,ht=2.5ex,dp=1.1ex,rightskip=0.5cm,right]{palette primary}%
     \usebeamerfont{date in head/foot}Academic Year 2026 \quad \insertframenumber{} / \inserttotalframenumber%
@@ -82,11 +82,10 @@
 \title[HAPPY Placenta Histology Replication \& Novelty]{HAPPY: Hierarchical Cellular-to-Tissue Phenotyping of Placenta Histology \& Attention-Enhanced Cell Classification}
 \subtitle{Course 22AIE437: Medical Image Processing --- Final Project Presentation}
 
-\author[Varshitha, Siri Sanjana \& Shreya]{
-  \textbf{Team Members:} \\
-  \vspace{0.1cm}
-  \textbf{Varshitha Thilak Kumar} (CB.SC.U4AIE23258) \\
-  \textbf{Siri Sanjana S} (CB.SC.U4AIE23249) \quad \textbf{Shreya Arun} (CB.SC.U4AIE23253) \\
+\author[Course 22AIE437]{
+  \textbf{Student Roll Numbers:} \\
+  \vspace{0.15cm}
+  \textbf{CB.SC.U4AIE23258} \quad \textbf{CB.SC.U4AIE23249} \quad \textbf{CB.SC.U4AIE23253} \\
   \vspace{0.25cm}
   \textit{B.Tech Computer Science \& Engineering (Artificial Intelligence)}
 }
@@ -439,7 +438,7 @@
           \item \textbf{GPU}: NVIDIA GeForce GTX 1650 (4 GB VRAM).
           \item \textbf{Host Environment}: Windows 11 x64, Python 3.10 virtual environment (\texttt{uv}).
           \item \textbf{Public Repository}: \\
-            \scriptsize\href{https://github.com/siri-sanjana/happy-placenta-histology-reproduction}{github.com/siri-sanjana/happy-placenta-histology-reproduction}
+            \scriptsize\href{https://github.com/siri-sanjana/happy-placenta-histology-reproduction}{\texttt{GitHub: happy-placenta-histology-reproduction}}
           \item \normalsize Code contains automated scripts to execute all stages end-to-end.
         \end{itemize}
       }
@@ -647,9 +646,9 @@
     \begin{exampleblock}{Group Member Contributions}
       \parbox[t][3.4cm][t]{\linewidth}{
         \begin{itemize}\tiny
-          \item \textbf{Varshitha Thilak Kumar (CB.SC.U4AIE23258)}: Environment config, CUDA/PyTorch porting, Stage 1 (RetinaNet) \& Stage 2 (ResNet) replication, Channel Attention design and benchmark testing.
-          \item \textbf{Siri Sanjana S (CB.SC.U4AIE23249)}: Spatial graph pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit coordinate bit-packing fix, Stage 3 ClusterGCN evaluation, report preparation.
-          \item \textbf{Shreya Arun (CB.SC.U4AIE23253)}: Multi-Class Focal Loss implementation, Mish activation integration, ablation experiments, qualitative visualization, and presentation design.
+          \item \textbf{CB.SC.U4AIE23258}: Environment config, CUDA/PyTorch porting, Stage 1 (RetinaNet) \& Stage 2 (ResNet) replication, Channel Attention design and benchmark testing.
+          \item \textbf{CB.SC.U4AIE23249}: Spatial graph pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit coordinate bit-packing fix, Stage 3 ClusterGCN evaluation, report preparation.
+          \item \textbf{CB.SC.U4AIE23253}: Multi-Class Focal Loss implementation, Mish activation integration, ablation experiments, qualitative visualization, and presentation design.
         \end{itemize}
       }
     \end{exampleblock}
