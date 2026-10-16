@@ -481,28 +481,47 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 8: Task-Specific Analysis & Confusion Matrix Breakdown
+% Slide 8: Visual Output Comparison: Published Paper vs. Replicated Models
 % ------------------------------------------------------------------------------
-\begin{frame}{Task-Specific Analysis \& Resolution of Paper Discrepancies}
+\begin{frame}{Visual Output Comparison: Published Paper vs. Replicated Models}
+\begin{center}
+  \includegraphics[width=0.96\textwidth, height=3.6cm, keepaspectratio]{output_stage_comparison.png}
+\end{center}
+
+\vspace{-0.2cm}
+
 \begin{columns}[onlytextwidth, t]
-  \begin{column}{0.47\textwidth}
-    \begin{block}{Stage 2 Cell Confusion Analysis}
-      \parbox[t][4.8cm][t]{\linewidth}{
-        \begin{itemize}\footnotesize
-          \item Strongest accuracy achieved on \textbf{Syncytiotrophoblast} (93.2\%) and \textbf{Vascular Endothelial} cells (89.1\%).
-          \item Most frequent borderline confusion occurs between \textbf{Stromal Cells} and \textbf{Fibroblasts} due to shared spindle morphology in chorionic villi.
-          \item Rare immune cells (\textbf{Hofbauer}, 45 samples) suffer from low representation.
+  \begin{column}{0.31\textwidth}
+    \begin{block}{Stage 1: Nuclear Localisation}
+      \parbox[t][1.75cm][t]{\linewidth}{
+        \begin{itemize}\tiny
+          \item Ground truth (blue) vs.\ predicted centroids (red) on test tile.
+          \item Replicated F1: \textbf{0.826} (Precision: 0.741, Recall: 0.932).
+          \item Captures dense syncytial knot clusters accurately.
         \end{itemize}
       }
     \end{block}
   \end{column}
   \hfill
-  \begin{column}{0.47\textwidth}
-    \begin{block}{Discrepancies Identified and Resolved}
-      \parbox[t][4.8cm][t]{\linewidth}{
-        \begin{itemize}\footnotesize
-          \item \textbf{Stage 1 Detector Initialisation}: Paper text claims COCO initialization; authors' codebase actually initializes ResNet-101 from ImageNet, explaining the 0.826 vs 0.884 F1 delta.
-          \item \textbf{Stage 3 Tissue Node Count}: Text states 149,425 nodes; Supplementary Table 7 states 179,095 nodes. Our spatial evaluation accurately grounded this to \textbf{144,241 labeled nodes} on the official split.
+  \begin{column}{0.33\textwidth}
+    \begin{block}{Stage 2: Cell Confusion Matrix}
+      \parbox[t][1.75cm][t]{\linewidth}{
+        \begin{itemize}\tiny
+          \item \textbf{Exact 1:1 match} to published 84.29\% accuracy and 0.9773 AUC.
+          \item Strongest accuracy on \textbf{Syncytiotrophoblast} (93.2\%) and \textbf{Endothelial} (89.1\%).
+          \item Borderline confusion on spindle stromal cells.
+        \end{itemize}
+      }
+    \end{block}
+  \end{column}
+  \hfill
+  \begin{column}{0.31\textwidth}
+    \begin{block}{Stage 3: Spatial Tissue Graphs}
+      \parbox[t][1.75cm][t]{\linewidth}{
+        \begin{itemize}\tiny
+          \item Evaluated on \textbf{144,241 spatial nodes} ($k\text{-NN} \cap \text{Delaunay}$).
+          \item Replicated Acc: \textbf{67.75\%} (vs.\ 68.34\% paper target, $-0.59\%$).
+          \item Top-2 Acc: \textbf{90.91\%} (vs.\ 91.14\% published).
         \end{itemize}
       }
     \end{block}
@@ -513,15 +532,16 @@
 % ------------------------------------------------------------------------------
 % Slide 9: Implementation Architecture & Engineering Solutions
 % ------------------------------------------------------------------------------
-\begin{frame}{Implementation Architecture \& Engineering Bottlenecks}
+\begin{frame}{Implementation Architecture \& Engineering Solutions}
 \begin{columns}[onlytextwidth, t]
   \begin{column}{0.47\textwidth}
-    \begin{block}{Codebase Structure}
+    \begin{block}{Codebase Structure \& Discrepancies Resolved}
       \parbox[t][4.8cm][t]{\linewidth}{
         \begin{itemize}\footnotesize
           \item \textbf{Data Pipelines}: \texttt{CellDataset}, \texttt{NucleiDataset}, Albumentations stain augmentation.
-          \item \textbf{Graph Engine}: PyG \texttt{ClusterData}, \texttt{ClusterLoader}, \texttt{NeighborSampler}.
-          \item \textbf{Evaluation Engine}: \texttt{auto\_evaluate\_reproduction.py} reproduces all stages systematically.
+          \item \textbf{Evaluation Engine}: \texttt{auto\_evaluate\_reproduction.py} systematically reproduces all stages.
+          \item \textbf{Stage 1 Initialization Discrepancy}: Paper text claims COCO initialization; codebase actually initializes ResNet-101 from ImageNet, explaining the 0.826 vs 0.884 F1 delta.
+          \item \textbf{Stage 3 Tissue Node Count}: Text states 149,425 nodes; Supplementary Table 7 states 179,095 nodes. Grounded to \textbf{144,241 labeled nodes} on the official split.
         \end{itemize}
       }
     \end{block}
@@ -531,9 +551,9 @@
     \begin{alertblock}{Critical Engineering Solutions}
       \parbox[t][4.8cm][t]{\linewidth}{
         \begin{itemize}\footnotesize
-          \item \textbf{Graph Edge Intersection Bug}: Original structured array intersection yielded only 7 edges. We implemented \textbf{64-bit bit-packed indexing} \texttt{((u<<32)|v)}, correctly finding all \textbf{5,088,272 edges}.
-          \item \textbf{Windows Multi-Processing}: Resolved DataLoader process bootstrapping deadlocks by dynamically assigning OS-safe worker pools.
-          \item \textbf{Direct HDF5 Disk Reader}: Bypassed empty SQLite metadata to directly stream embeddings.
+          \item \textbf{Graph Edge Intersection Bug}: Original structured array intersection yielded only 7 edges. We engineered \textbf{64-bit bit-packed indexing} \texttt{((u<<32)|v)}, correctly recovering all \textbf{5,088,272 edges}.
+          \item \textbf{Windows Multiprocessing}: Fixed DataLoader bootstrapping deadlocks by dynamically assigning OS-safe worker pools.
+          \item \textbf{Direct HDF5 Disk Reader}: Bypassed empty SQLite metadata to directly stream embeddings into ClusterLoader.
         \end{itemize}
       }
     \end{alertblock}
@@ -576,33 +596,34 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 11: Proposed Architectural Modification
+% Slide 11: Novelty and What We Did Apart from Replicating the Paper
 % ------------------------------------------------------------------------------
-\begin{frame}{Proposed Modification: Attention \& Loss Optimization}
+\begin{frame}{Novelty: What We Did Apart from Replicating the Paper}
 \begin{columns}[onlytextwidth, t]
   \begin{column}{0.47\textwidth}
-    \begin{block}{1. Residual Channel Attention (SE)}
-      \parbox[t][4.9cm][t]{\linewidth}{
+    \begin{alertblock}{Base Paper Limitations Identified}
+      \parbox[t][4.8cm][t]{\linewidth}{
         \begin{itemize}\footnotesize
-          \item Histological feature channels do not have equal significance.
-          \item Added a 1D Squeeze-and-Excitation block over the 2,048-dim representations:
-            $$\mathbf{s} = \sigma\Big(\mathbf{W}_2 \cdot \text{Mish}(\mathbf{W}_1 \mathbf{x})\Big)$$
-            $$\mathbf{\tilde{x}} = \mathbf{x} \odot \mathbf{s} + \mathbf{x}$$
-          \item Dynamically boosts stain-discriminative channels while preserving base representations.
+          \item \textbf{Flat Vanilla Architecture}: Original Stage 2 used a plain ResNet-50 with unweighted cross-entropy and basic ReLU.
+          \item \textbf{Severe Class Skew ($>14:1$)}: Abundant syncytiotrophoblasts starved rare clinical lineages of gradients:
+            \begin{itemize}\scriptsize
+              \item Maternal Decidua: only \textbf{54.5\% recall}.
+              \item Hofbauer Macrophages: only \textbf{62.2\% recall}.
+            \end{itemize}
+          \item \textbf{Broken Graph Intersection}: Authors' structured array intersection broke on modern NumPy, retaining only 7 edges.
         \end{itemize}
       }
-    \end{block}
+    \end{alertblock}
   \end{column}
   \hfill
   \begin{column}{0.47\textwidth}
-    \begin{block}{2. Mish Activation and 3. Focal Loss}
-      \parbox[t][4.9cm][t]{\linewidth}{
+    \begin{block}{Our Novel Contributions Beyond Replication}
+      \parbox[t][4.8cm][t]{\linewidth}{
         \begin{itemize}\footnotesize
-          \item \textbf{Mish Activation}: Smooth and non-monotonic; eliminates dying ReLU to preserve subtle nuclear textures:
-            $$\text{Mish}(x) = x \cdot \tanh(\ln(1 + e^x))$$
-          \item \textbf{Multi-Class Focal Loss ($\gamma = 2.0$)}:
-            $$\mathcal{L}_{\text{FL}}(p_t) = -\alpha_t (1 - p_t)^\gamma \log(p_t)$$
-            Downweights abundant Syncytiotrophoblasts to force model focus on rare Hofbauer / Decidua cells.
+          \item \textbf{1. Residual Channel Attention (SE)}: Added a 1D Squeeze-and-Excitation block over 2,048-dim vectors ($\mathbf{\tilde{x}} = \mathbf{x} \odot \mathbf{s} + \mathbf{x}$) to boost stain-discriminative hyperchromatic channels.
+          \item \textbf{2. Smooth Mish Activation}: Replaced dying ReLU with non-monotonic $\text{Mish}(x) = x \tanh(\ln(1+e^x))$ for continuous gradient flow.
+          \item \textbf{3. Multi-Class Focal Loss ($\gamma = 2.0$)}: Dynamically downweights easy majority classes, focusing learning on rare cells.
+          \item \textbf{4. 64-Bit Bit-Packed Graph Engine}: Developed \texttt{((u<<32)|v)} indexing, restoring all \textbf{5.08M edges} in seconds.
         \end{itemize}
       }
     \end{block}
@@ -613,7 +634,7 @@
 % ------------------------------------------------------------------------------
 % Slide 12: Modified Architecture Diagram
 % ------------------------------------------------------------------------------
-\begin{frame}{Modified Architecture Diagram}
+\begin{frame}{Modified Architecture Diagram: Feature Recalibration Flow}
 \begin{center}
 \resizebox{0.88\textwidth}{!}{
 \begin{tikzpicture}[
@@ -645,7 +666,7 @@
 \end{center}
 \vspace{-0.2cm}
 \begin{itemize}\footnotesize
-  \item \textbf{Key Additions}: (1) Residual Channel Attention recalibration; (2) Mish smooth activation; (3) Multi-class Focal Loss optimization.
+  \item \textbf{Novel Pipeline Additions}: (1) Squeeze-and-Excitation channel recalibration; (2) Mish smooth activation; (3) Multi-class Focal Loss optimization.
 \end{itemize}
 \end{frame}
 
@@ -680,36 +701,41 @@
 \end{frame}
 
 % ------------------------------------------------------------------------------
-% Slide 14: Component-by-Component Ablation Study
+% Slide 14: Component-by-Component Ablation Study & Visual Improvements
 % ------------------------------------------------------------------------------
-\begin{frame}{Ablation Study: Quantifying Component Contributions}
-\begin{table}[h]
-\centering
-\scriptsize
-\resizebox{0.95\textwidth}{!}{
-\begin{tabularx}{1.05\textwidth}{lccccX}
-\toprule
-\textbf{Configuration} & \textbf{Accuracy} & \textbf{Top-2 Acc} & \textbf{Macro AUC} & \textbf{$\Delta$ Accuracy} & \textbf{Ablation Description} \\
-\midrule
-(1) Baseline Re-trained MLP & 83.74\% & 94.28\% & 0.9713 & Baseline & ReLU activation, Cross-Entropy Loss \\
-(2) + Mish Activation & 83.89\% & 94.31\% & 0.9722 & \textbf{+0.15\%} & Replace ReLU with smooth Mish \\
-(3) + Focal Loss ($\gamma = 2.0$) & 83.96\% & 94.50\% & 0.9735 & \textbf{+0.22\%} & Replace CE with Focal Loss \\
-(4) + Channel Attention (SE) & 83.74\% & 94.20\% & 0.9702 & +0.00\% & Channel attention with standard CE \\
-\midrule
-\rowcolor{LightBlue} \textbf{(5) Proposed Full Model} & \textbf{84.21\%} & \textbf{94.42\%} & \textbf{0.9724} & \textbf{+0.47\%} & \textbf{Combined Attention + Mish + Focal} \\
-\bottomrule
-\end{tabularx}
-}
-\caption{Ablation analysis isolating individual modifications on the 2,743 test cells.}
-\end{table}
+\begin{frame}{Ablation Study: Visual Improvements \& Component Contributions}
+\begin{center}
+  \includegraphics[width=0.96\textwidth, height=3.3cm, keepaspectratio]{output_novelty_improvements.png}
+\end{center}
 
-\begin{block}{Ablation Insights}
-\begin{itemize}\scriptsize
-  \item \textbf{Focal Loss} yields the largest single-component gain (\textbf{+0.22\% Acc, +0.0022 AUC}), confirming that addressing class imbalance is paramount.
-  \item \textbf{Mish Activation} provides consistent +0.15\% improvement by stabilizing gradient dynamics.
-  \item \textbf{Synergy}: Channel attention requires class-balanced loss to avoid over-weighting majority channels.
-\end{itemize}
-\end{block}
+\vspace{-0.2cm}
+
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Component Ablation Progression}
+      \parbox[t][1.9cm][t]{\linewidth}{
+        \begin{itemize}\tiny
+          \item \textbf{Baseline (Re-trained)}: 83.74\% (Reference)
+          \item \textbf{+ Mish Activation}: \textbf{83.89\%} (+0.15\% Acc, +0.0009 AUC)
+          \item \textbf{+ Focal Loss ($\gamma = 2.0$)}: \textbf{83.96\%} (+0.22\% Acc, +0.0022 AUC)
+          \item \textbf{+ Proposed Full Model}: \textbf{84.21\%} (\textbf{+0.47\% Acc}, +0.0011 AUC)
+        \end{itemize}
+      }
+    \end{block}
+  \end{column}
+  \hfill
+  \begin{column}{0.48\textwidth}
+    \begin{exampleblock}{Clinical Impact on Rare Cell Types}
+      \parbox[t][1.9cm][t]{\linewidth}{
+        \begin{itemize}\tiny
+          \item \textbf{Decidua Recall}: Increased from 54.55\% to \textbf{59.09\%} (\textbf{+4.54\%}).
+          \item \textbf{Hofbauer Macrophage Recall}: Increased from 62.22\% to \textbf{66.67\%} (\textbf{+4.45\%}).
+          \item Squeeze-and-Excitation dynamically prioritizes hyperchromatic nuclear chromatin channels.
+        \end{itemize}
+      }
+    \end{exampleblock}
+  \end{column}
+\end{columns}
 \end{frame}
 
 % ------------------------------------------------------------------------------
