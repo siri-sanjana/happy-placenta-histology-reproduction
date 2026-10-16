@@ -757,44 +757,31 @@
 % ------------------------------------------------------------------------------
 \begin{frame}{Clinical Insights, Conclusion and Contributions}
 \begin{columns}[onlytextwidth, t]
-  \begin{column}{0.47\textwidth}
-    \begin{block}{Clinical Imbalance \& Diagnostic Safety}
-      \parbox[t][2.2cm][t]{\linewidth}{
-        \begin{itemize}\tiny
-          \item \textbf{$>14:1$ Skew}: Syncytiotrophoblasts dominate over rare maternal decidua (44) and immune Hofbauer cells (45).
-          \item \textbf{Clinical Recall Boost}: Our model boosted Decidua recall from \textbf{54.5\% to 59.1\%} (+4.6\%) and Hofbauer from \textbf{62.2\% to 66.7\%} (+4.5\%).
-          \item \textbf{Attention Efficacy}: Channel recalibration accents nuclear hyperchromasia channels critical in pathology.
-        \end{itemize}
-      }
-    \end{block}
-    \vspace{0.12cm}
-    \begin{block}{Key References}
-      \parbox[t][1.9cm][t]{\linewidth}{
-        \tiny
-        1. Vanea et al., \textit{Nat Commun}, 15:1968, 2024.\par
-        2. Lin et al., Focal Loss for Dense Detection, \textit{ICCV}, 2017.\par
-        3. Hu et al., Squeeze-and-Excitation Networks, \textit{CVPR}, 2018.\par
-        4. Misra, D., Mish Activation, \textit{BMVC}, 2020.
-      }
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Clinical Insights \& Takeaways}
+      \begin{itemize}\scriptsize
+        \item \textbf{Mitigation of $>14:1$ Skew}: Syncytiotrophoblasts heavily dominate over rare decidua (44) and Hofbauer cells (45).
+        \item \textbf{Diagnostic Safety Boost}: Attention-recalibrated model boosted Decidua recall to \textbf{59.1\%} (+4.54\%) and Hofbauer to \textbf{66.7\%} (+4.45\%).
+        \item \textbf{Attention Recalibration}: Squeeze-and-Excitation dynamically prioritizes hyperchromatic nuclear chromatin channels.
+        \item \textbf{Gradient Smoothness}: Non-monotonic Mish activation prevents neuron saturation, ensuring stable gradient flow.
+        \item \textbf{Graph Scalability}: 64-bit bit-packed indexing recovered all 5.08M spatial graph edges for multi-hop inference.
+      \end{itemize}
     \end{block}
   \end{column}
   \hfill
-  \begin{column}{0.47\textwidth}
-    \begin{exampleblock}{Group Member Contributions}
-      \parbox[t][3.4cm][t]{\linewidth}{
-        \begin{itemize}\tiny
-          \item \textbf{CB.SC.U4AIE23258}: Environment config, CUDA/PyTorch porting, Stage 1 (RetinaNet) \& Stage 2 (ResNet) replication, Channel Attention design and benchmark testing.
-          \item \textbf{CB.SC.U4AIE23249}: Spatial graph pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit coordinate bit-packing fix, Stage 3 ClusterGCN evaluation, report preparation.
-          \item \textbf{CB.SC.U4AIE23253}: Multi-Class Focal Loss implementation, Mish activation integration, ablation experiments, qualitative visualization, and presentation design.
-        \end{itemize}
-      }
+  \begin{column}{0.48\textwidth}
+    \begin{exampleblock}{Conclusion \& Member Roles}
+      \begin{itemize}\scriptsize
+        \item \textbf{End-to-End Hierarchy}: Replicated all 3 pipeline stages on held-out test splits, achieving exact 84.29\% test accuracy.
+        \item \textbf{Novelty Validation}: SE Attention + Mish + Focal Loss reached 84.21\% accuracy in 40 epochs with superior rare-lineage sensitivity.
+        \item \textbf{Member Role Allocations}:
+          \begin{itemize}\scriptsize
+            \item \textbf{CB.SC.U4AIE23258}: Environment/CUDA setup, Stages 1 \& 2 replication, Channel Attention design, benchmark testing.
+            \item \textbf{CB.SC.U4AIE23249}: Spatial graph pipeline ($k\text{-NN} \cap \text{Delaunay}$), 64-bit coordinate bit-packing fix, Stage 3 ClusterGCN.
+            \item \textbf{CB.SC.U4AIE23253}: Multi-Class Focal Loss, Mish activation, ablation study, visual plots, and report.
+          \end{itemize}
+      \end{itemize}
     \end{exampleblock}
-    \vspace{0.12cm}
-    \begin{center}
-      \textbf{\textcolor{AmritaBlue}{\large Thank You!}} \\
-      \vspace{0.05cm}
-      \textit{\small Questions and Discussion}
-    \end{center}
   \end{column}
 \end{columns}
 \end{frame}
