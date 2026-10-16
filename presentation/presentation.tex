@@ -237,37 +237,91 @@
 % ------------------------------------------------------------------------------
 % Slide 5: Base Paper Architecture Diagram (Section 2: Base Paper - Part 2)
 % ------------------------------------------------------------------------------
-\begin{frame}{Hierarchical Pipeline Architecture}
+\begin{frame}{Stage 2 Base Architecture: ResNet-50 Deep Residual Network}
+% Full Sequential Layer Pipeline Diagram
 \begin{center}
-\resizebox{0.92\textwidth}{!}{
+\resizebox{0.96\textwidth}{!}{
 \begin{tikzpicture}[
-    node distance=1.2cm and 1.5cm,
-    block/.style={rectangle, draw=AmritaBlue, fill=LightBlue, thick, rounded corners, minimum width=2.5cm, minimum height=1.1cm, align=center, font=\footnotesize},
-    model/.style={rectangle, draw=MedBlue, fill=MedBlue, text=white, thick, rounded corners, minimum width=2.6cm, minimum height=1.2cm, align=center, font=\footnotesize\bfseries},
-    arrow/.style={-{Stealth[length=3mm]}, thick, color=AmritaBlue}
+    node distance=0.45cm and 0.4cm,
+    font=\sffamily,
+    patch/.style={rectangle, draw=AmritaBlue, fill=LightBlue, thick, rounded corners=2pt, minimum width=1.4cm, minimum height=1.1cm, align=center, font=\tiny},
+    stem/.style={rectangle, draw=MedBlue!80, fill=MedBlue!15, thick, rounded corners=2pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny},
+    stage/.style={rectangle, draw=MedBlue, fill=MedBlue, text=white, thick, rounded corners=3pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    gap/.style={rectangle, draw=AccentCyan!80!black, fill=AccentCyan!20, thick, rounded corners=2pt, minimum width=1.3cm, minimum height=1.1cm, align=center, font=\tiny},
+    mlp/.style={rectangle, draw=SuccessGreen, fill=SuccessGreen, text=white, thick, rounded corners=3pt, minimum width=1.5cm, minimum height=1.1cm, align=center, font=\tiny\bfseries},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick, color=AmritaBlue}
 ]
-  % Nodes
-  \node[block] (wsi) {Placenta WSI\\(H\&E Gigapixel)};
-  \node[model, right=of wsi] (retina) {Stage 1: RetinaNet\\(ResNet-101 FPN)};
-  \node[block, right=of retina] (nuclei) {Nuclei Centroids\\\& Patches ($224\times 224$)};
-  \node[model, below=1.0cm of nuclei] (resnet) {Stage 2: ResNet-50\\Cell Classifier};
-  \node[block, left=of resnet] (embed) {Cell Classes \&\\64-dim Embeddings};
-  \node[model, left=of embed] (graph) {Stage 3: ClusterGCN\\($k$-NN $\cap$ Delaunay)};
-  \node[block, below=0.8cm of graph] (out) {Whole-Slide Tissue Phenotypes\\(Villi, Decidua, Fibrin, Avascular)};
+  % Layer Nodes
+  \node[patch] (in) {Input Patch\\$224\times 224\times 3$};
+  \node[stem, right=of in] (stem) {Conv1+Pool\\$7\times 7, \text{s}2; 3\times 3$\\$112\rightarrow 56$};
+  \node[stage, right=of stem] (c2) {Conv2\_x\\$3\times$ Blocks\\256-d ($56^2$)};
+  \node[stage, right=of c2] (c3) {Conv3\_x\\$4\times$ Blocks\\512-d ($28^2$)};
+  \node[stage, right=of c3] (c4) {Conv4\_x\\$6\times$ Blocks\\1024-d ($14^2$)};
+  \node[stage, right=of c4] (c5) {Conv5\_x\\$3\times$ Blocks\\2048-d ($7^2$)};
+  \node[gap, right=of c5] (gap) {Global\\Avg Pool\\$1\times 1\times 2048$};
+  \node[mlp, right=of gap] (out) {MLP Head\\64-d Embed\\11 Classes};
 
-  % Arrows
-  \draw[arrow] (wsi) -- (retina);
-  \draw[arrow] (retina) -- (nuclei);
-  \draw[arrow] (nuclei) -- (resnet);
-  \draw[arrow] (resnet) -- (embed);
-  \draw[arrow] (embed) -- (graph);
-  \draw[arrow] (graph) -- (out);
+  % Sequential Arrows
+  \draw[arrow] (in) -- (stem);
+  \draw[arrow] (stem) -- (c2);
+  \draw[arrow] (c2) -- (c3);
+  \draw[arrow] (c3) -- (c4);
+  \draw[arrow] (c4) -- (c5);
+  \draw[arrow] (c5) -- (gap);
+  \draw[arrow] (gap) -- (out);
 \end{tikzpicture}
 }
 \end{center}
-\begin{itemize}\footnotesize
-  \item \textbf{Bottom-up Information Flow}: Nuclear centroids inform patch extraction $\rightarrow$ patches yield phenotypic embeddings $\rightarrow$ spatial embeddings assemble into graph nodes for macro-tissue classification.
-\end{itemize}
+
+\vspace{-0.1cm}
+
+\begin{columns}[onlytextwidth, t]
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Bottleneck Residual Block Design}
+      \parbox[t][2.85cm][t]{\linewidth}{
+        \centering
+        \resizebox{0.80\linewidth}{!}{
+        \begin{tikzpicture}[
+            node distance=0.2cm and 0.5cm,
+            font=\sffamily,
+            bop/.style={rectangle, draw=MedBlue, fill=LightBlue, thick, rounded corners=2pt, minimum width=2.4cm, minimum height=0.45cm, align=center, font=\scriptsize},
+            sum/.style={circle, draw=AlertRed, fill=AlertRed!20, thick, minimum size=0.45cm, align=center, font=\footnotesize\bfseries},
+            barr/.style={-{Stealth[length=2mm]}, thick, color=AmritaBlue},
+            sarr/.style={-{Stealth[length=2mm]}, thick, dashed, color=AlertRed}
+        ]
+          \node[font=\scriptsize\bfseries] (xin) {Input $\mathbf{x}$};
+          \node[bop, below=0.12cm of xin] (b1) {$1\times 1\text{ Conv, } C/4 \rightarrow \text{BN}+\text{ReLU}$};
+          \node[bop, below=0.12cm of b1] (b2) {$3\times 3\text{ Conv, } C/4 \rightarrow \text{BN}+\text{ReLU}$};
+          \node[bop, below=0.12cm of b2] (b3) {$1\times 1\text{ Conv, } C \rightarrow \text{BN}$};
+          \node[sum, below=0.12cm of b3] (add) {$\mathbf{+}$};
+          \node[below=0.10cm of add, font=\scriptsize\bfseries] (xout) {Output: $\text{ReLU}(\mathcal{F}(\mathbf{x}) + \mathbf{x})$};
+
+          \draw[barr] (xin) -- (b1);
+          \draw[barr] (b1) -- (b2);
+          \draw[barr] (b2) -- (b3);
+          \draw[barr] (b3) -- (add);
+          \draw[barr] (add) -- (xout);
+
+          % Skip Connection
+          \draw[sarr] (xin.south) -- ++(1.7,0) |- (add.east) node[midway, right=1pt, font=\tiny\bfseries] {Identity Skip $\mathbf{x}$};
+        \end{tikzpicture}
+        }
+      }
+    \end{block}
+  \end{column}
+  \hfill
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Key Architectural Principles in HAPPY}
+      \parbox[t][2.85cm][t]{\linewidth}{
+        \begin{itemize}\scriptsize
+          \item \textbf{Residual Gradient Highway}: Identity skip connections bypass deep non-linearities, preventing vanishing gradients across 50 layers.
+          \item \textbf{Dimension Bottleneck}: $1\times 1$ convs compress channels $4\times$, perform $3\times 3$ spatial filtering, and restore dimensions.
+          \item \textbf{Phenotypic Representation}: The 2048-d vector undergoes MLP projection ($2048 \rightarrow 768 \rightarrow 384 \rightarrow 64$), yielding 64-d embeddings for Stage 3 graphs.
+        \end{itemize}
+      }
+    \end{block}
+  \end{column}
+\end{columns}
 \end{frame}
 
 % ------------------------------------------------------------------------------
